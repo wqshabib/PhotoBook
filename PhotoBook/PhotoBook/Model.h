@@ -26,7 +26,41 @@
 
 // 图片源
 @interface SourceImg : AtomObject
+// 偏移量
 @property (nonatomic, strong) Offset *offset;
+
+// 上报数据：
+
+/*
+ "imgId": 1213,
+ "imgSrc": "http:\/\/diy.h5.keepii.com\/uploads\/photo\/941in\/19\/02\/19\/thumb_11437514375c6b68d8e7ce46.92204605.jpeg",
+ "rwidth": 562,
+ "rheight": 750,
+ "swidth": 562,
+ "sheight": 375,
+ "sx": 0,
+ "sy": 188,
+ "rotate": 0,
+ */
+
+@property (nonatomic, copy) NSString *imgSrc;// 图片缩略图
+
+@property (nonatomic, copy) NSNumber *imgId;// 图片id - 用来标志原图
+
+
+@property (nonatomic, copy) NSNumber *rwidth;  // 原图宽
+@property (nonatomic, copy) NSNumber *rheight; // 原图高
+
+// 剪切数据
+@property (nonatomic, copy) NSNumber *swidth;
+@property (nonatomic, copy) NSNumber *sheight;
+@property (nonatomic, copy) NSNumber *sx;
+@property (nonatomic, copy) NSNumber *sy;
+
+// 旋转
+@property (nonatomic, copy) NSNumber *rotate;
+
+
 @end
 
 // 背景
@@ -39,7 +73,7 @@
 @property (nonatomic, copy) NSNumber *zIndex;
 @end
 
-// 相片
+// 相位
 @interface Photos : AtomObject
 @property (nonatomic, copy) NSNumber *height;
 @property (nonatomic, copy) NSString *image;
@@ -81,6 +115,11 @@
 @property (nonatomic, copy) NSNumber *width;
 
 @property (nonatomic, copy) NSArray <Page *> *page;
+
+// 缩略图（上传用）
+@property (nonatomic, copy) NSString *previewImage;
+
+
 
 @end
 

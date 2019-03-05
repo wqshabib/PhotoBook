@@ -18,6 +18,7 @@ PODS:
   - SDWebImage (4.4.4):
     - SDWebImage/Core (= 4.4.4)
   - SDWebImage/Core (4.4.4)
+  - TOCropViewController (2.4.0)
   - YLCore (0.1.0)
   - YLHttp (0.1.2):
     - AFNetworking
@@ -30,6 +31,7 @@ PODS:
     - SDWebImage
 
 DEPENDENCIES:
+  - TOCropViewController
   - YLHttp
   - YLUIExt
   - ZLPhotoBrowser
@@ -39,6 +41,7 @@ SPEC REPOS:
     - AFNetworking
     - GPUImage
     - SDWebImage
+    - TOCropViewController
     - YLCore
     - YLHttp
     - YLUIExt
@@ -48,11 +51,12 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
   SDWebImage: c00ec18ab25d10e5ffac109b0f78d1b4341c9691
+  TOCropViewController: 368d8df3ea43b62c3dc5a61f11b9048274d240bd
   YLCore: cd9fbd6c395f8a4db76988e511eea3404bf4ce40
   YLHttp: 5729b14bd756653cada2799c92de58d6fcc8026a
   YLUIExt: 177ccb1d67d717117ccc35329dd93f4ca311ce16
   ZLPhotoBrowser: ef9d5cdc9fdc8ce029fd0e41223e8eb8a642918f
 
-PODFILE CHECKSUM: df3210cb04934aa084b9b8390899fa02dde4e135
+PODFILE CHECKSUM: 6ec4b88977e528c1f9cad3568acdd460ef3101ab
 
 COCOAPODS: 1.5.0

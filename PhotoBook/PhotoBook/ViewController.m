@@ -20,32 +20,37 @@
 
 // 本地数据源
 @property (nonatomic,strong) TemplateData *templateData;
-
+// 大纲列表
 @property (weak, nonatomic) IBOutlet YLTableView *summaryTableView;
+// 工作区
 @property (weak, nonatomic) IBOutlet UIView *workSpaceView;
-
-
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *toolBarHeight;
-@property (nonatomic,assign) BOOL isExpand;
-
-
+// 缩放比例 0 - 1
 @property (nonatomic,assign) double ratio;
-@property (nonatomic,assign) NSInteger index;
+// 当前页
+@property (nonatomic,assign) NSInteger selectIndex;
+// 当前页数据
 @property (nonatomic,strong) Paper *selectPaper;
-
+// 工作区宽度
 @property (nonatomic,assign) CGRect workSpaceFrame;
-
+// 画布宽
 @property (nonatomic,assign) CGRect cavasFrame;
-
+// 画布
 @property (strong, nonatomic) UIView *cavas;
+// 画布上的页
 @property (strong, nonatomic) NSMutableArray<UIView*> *cavasPages;
-
+// 相册控制器
 @property (nonatomic,strong) ManagerPhotoViewController *managerPhotoVC;
 
 @end
 
 @implementation ViewController
 
+
+// 刷新界面
+-(void)setState {
+    [self addCanvas];
+    [self addElement];
+}
 
 -(void)calculateRatio {
     Paper *paper = self.selectPaper;
@@ -74,7 +79,7 @@
     self.cavas = canvas;
 }
 
--(void)addBG {
+-(void)addElement {
     CGRect cavasFrame = self.cavasFrame;
     Paper *paper = self.selectPaper;
     double perWidth = cavasFrame.size.width /  paper.page.count;
@@ -185,11 +190,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.index = 0;
+    self.selectIndex = 0;
     [self setupNavBarButtons];
     [self initTable];
     [self requestInitData];
-    self.isExpand = YES;
 }
 
 -(void)initTable{
@@ -219,10 +223,9 @@
             TmplData *data = self.templateData.tmplData[0];
             Paper *paper = data.paper;
             self.selectPaper = paper;
-            self.index = 0;
+            self.selectIndex = 0;
             [self calculateRatio];
-            [self addCanvas];
-            [self addBG];
+            [self setState];
         }
     
     } failure:^(NSError *error) {
@@ -264,16 +267,16 @@
         [cell.button setTitle:text forState:UIControlStateNormal];
     }
     
+    // 大纲点击切换
     WEAK(self)
     cell.button.onPress = ^(YLButton *button) {
         STRONG(self)
         TmplData *data = self.templateData.tmplData[indexPath.row];
         Paper *paper = data.paper;
         self.selectPaper = paper;
-        self.index = indexPath.row;
+        self.selectIndex = indexPath.row;
         [self calculateRatio];
-        [self addCanvas];
-        [self addBG];
+        [self setState];
     };
     return cell;
 }
