@@ -70,5 +70,13 @@
 
 @end
 
+@implementation GenerateData
++ (NSDictionary *)bridgeClassAndArray {
+    return @{@"prodData":@"TmplData"};
+}
+@end
 
+@implementation GenerateResponse
+
+@end
 

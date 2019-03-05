@@ -10,8 +10,12 @@
 #import "YLTableView.h"
 #import "SummaryCell.h"
 #import "ManagerPhotoViewController.h"
+#import "PhotoChip.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
+
+#define URL_Genearate @"http://diy.h5.keepii.com/index.php?m=diy&a=generate"
+
 #define kProdSn @"20190222153837-3-4-13206737285c6fa6fdb03b32.42716265"
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
@@ -79,6 +83,44 @@
     self.cavas = canvas;
 }
 
+-(CGRect)toMiniRect:(CGRect)rawRect ratio:(double)ratio{
+    double rx = rawRect.origin.x;
+    double ry = rawRect.origin.y;
+    double rw = rawRect.size.width;
+    double rh = rawRect.size.height;
+    
+    double x = rx * ratio;
+    double y = ry * ratio;
+    double w = rw * ratio;
+    double h = rh * ratio;
+    return CGRectMake(x ,y, w,h);
+}
+
+-(CGRect)getPhotoChipRawRect:(Photos*)photo{
+    if (photo == nil) {
+        return CGRectMake(0, 0, 0, 0);
+    }
+    double x = [photo.x doubleValue];
+    double y = [photo.y doubleValue];
+    double w = [photo.width doubleValue];
+    double h = [photo.height doubleValue];
+    return CGRectMake(x ,y, w,h);
+}
+
+
+-(CGRect)getRealPhotoOffSetRawRect:(Photos*)photo{
+    if (photo == nil) {
+        return CGRectMake(0, 0, 0, 0);
+    }
+    Offset *offset = photo.sourceImg.offset;
+    double x = [offset.x doubleValue];
+    double y = [offset.y doubleValue];
+    double w = [offset.width doubleValue];
+    double h = [offset.height doubleValue];
+    return CGRectMake(x ,y, w,h);
+}
+
+
 -(void)addElement {
     CGRect cavasFrame = self.cavasFrame;
     Paper *paper = self.selectPaper;
@@ -94,70 +136,25 @@
         [self.cavasPages addObject:tmpView];
         [self.cavas addSubview:tmpView];
         
-        YLImageView *tmpImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, pageRect.size.width, pageRect.size.height)];
-        tmpImageView.imageUrl = page.data.bg.image;
-        [tmpView addSubview:tmpImageView];
+        YLImageView *bgImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, pageRect.size.width, pageRect.size.height)];
+        bgImageView.imageUrl = page.data.bg.image;
+        [tmpView addSubview:bgImageView];
         
         Data *data = page.data;
         for (int k = 0; k < data.photos.count ; k++) {
             Photos *photo = data.photos[k];
             
-            double photoRawW = [photo.width doubleValue];
-            double photoRawH = [photo.height doubleValue];
-            double photoRawX = [photo.x doubleValue];
-            double photoRawY = [photo.y doubleValue];
+            CGRect rectPhotos = [self getPhotoChipRawRect:photo];
+            CGRect miniRectFrame = [self toMiniRect:rectPhotos ratio:self.ratio];
             
-            double photoRatioW = photoRawW * self.ratio;
-            double photoRatioH = photoRawH * self.ratio;
-            double photoRatioX = photoRawX * self.ratio;
-            double photoRatioY = photoRawY * self.ratio;
+            CGRect rectRealPhotos = [self getRealPhotoOffSetRawRect:photo];
+            CGRect miniRealRectFrame = [self toMiniRect:rectRealPhotos ratio:self.ratio];
             
-            // 相位
-            CGRect photoLocationRect = CGRectMake(photoRatioX ,photoRatioY, photoRatioW,photoRatioH);
-            UIView *photoLocationView = [[UIView alloc]initWithFrame:photoLocationRect];
-            photoLocationView.backgroundColor = [UIColor clearColor];
-            [tmpView addSubview:photoLocationView];
-            
-       
-            // 偏移量
-            Offset *offset = photo.sourceImg.offset;
-            
-            double offsetRawW = [offset.width doubleValue];
-            double offsetRawH = [offset.height doubleValue];
-            double offsetRawX = [offset.x doubleValue];
-            double offsetRawY = [offset.y doubleValue];
-            
-            double offsetRatioW = offsetRawW * self.ratio;
-            double offsetRatioH = offsetRawH * self.ratio;
-            double offsetRatioX = offsetRawX * self.ratio;
-            double offsetRatioY = offsetRawY * self.ratio;
-            // 真实照片
-            CGRect photoRealRect = CGRectMake(offsetRatioX,offsetRatioY, offsetRatioW,offsetRatioH);
-            UIView *photoRealView = [[UIView alloc]initWithFrame:photoRealRect];
-            photoRealView.backgroundColor = COLORA(0, 0, 0, 0.6);
-            [photoLocationView addSubview:photoRealView];
-            
-            // 小图标
-            double iconSize = 20;
-            YLImageView *iconImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, iconSize, iconSize)];
-            iconImageView.image = [UIImage imageNamed:@"placeholder3"];
-            [photoRealView addSubview:iconImageView];
-            iconImageView.center = [photoRealView convertPoint:photoRealView.center toView:photoRealView];
-            
-            // 边框
-            YLImageView *photoBgImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, photoRatioW, photoRatioH)];
-            photoBgImageView.imageUrl = photo.image;
-            [photoLocationView addSubview:photoBgImageView];
-            
-            double rotateAngle  = [photo.rotate doubleValue];
-            double rotateRadian = rotateAngle / 180 * M_PI_2;
-            photoLocationView.transform = CGAffineTransformMakeRotation(rotateRadian);
-            
-            // 点选按钮
-            YLButton *button = [YLButton buttonWithType:UIButtonTypeCustom];
-            button.frame = CGRectMake(0, 0, photoRatioW, photoRatioH);
-            [photoLocationView addSubview:button];
-            [button addTarget:self action:@selector(onPressSelectLoc:) forControlEvents:UIControlEventTouchUpInside];
+            PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
+            [tmpView addSubview:chip];
+            [chip addRealPhoto:@"https://ss0.baidu.com/73t1bjeh1BF3odCf/it/u=277804562,2042153658&fm=85&s=2F00DF4B8576958C371C78230300E0D0"];
+            [chip addBorderImage:photo.image];
+            [chip roate:photo.rotate];
         }
     }
 }
@@ -194,12 +191,44 @@
     [self setupNavBarButtons];
     [self initTable];
     [self requestInitData];
+//    [self requestGenerate];
 }
 
 -(void)initTable{
     // 代理
     self.summaryTableView.delegate   = self;
     self.summaryTableView.dataSource = self;
+}
+
+
+-(void)requestGenerate {
+    WEAK(self)
+    [YLHttpTool POST:URL_Genearate params:@{@"prodSn":kProdSn} success:^(NSDictionary *JSON) {
+        STRONG(self)
+        GenerateResponse *resp = (GenerateResponse*)[GenerateResponse toModel:JSON];
+        if (resp.status != 0) {
+            return;
+        }
+        self.templateData = [[TemplateData alloc]init];
+        self.templateData.tmplData = resp.data.prodData;
+        // 重新排序
+        self.templateData = [self sortTemplateData];
+//        NSLog(@"%@",self.templateData.prodSn);
+        [self.summaryTableView reloadData];
+        self.workSpaceFrame = self.workSpaceView.frame;
+        
+        if (self.templateData.tmplData.count > 0) {
+            TmplData *data = self.templateData.tmplData[0];
+            Paper *paper = data.paper;
+            self.selectPaper = paper;
+            self.selectIndex = 0;
+            [self calculateRatio];
+            [self setState];
+        }
+        
+    } failure:^(NSError *error) {
+        //
+    }];
 }
 
 

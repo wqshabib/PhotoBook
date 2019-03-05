@@ -184,4 +184,18 @@
 
 
 
+#pragma mark -
+#pragma mark generate返回接口
+
+@interface GenerateData : AtomObject
+
+@property (nonatomic, copy)  NSArray <TmplData*> *prodData;
+
+@end
+
+@interface GenerateResponse : Response
+
+@property (nonatomic, copy)  GenerateData *data;
+
+@end
 
