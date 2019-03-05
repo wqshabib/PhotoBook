@@ -1,0 +1,1 @@
+../../../YLCore/YLCore/YLCore/Classes/Util/NSString+Predicate.h

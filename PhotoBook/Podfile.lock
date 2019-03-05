@@ -1,0 +1,58 @@
+PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - GPUImage (0.1.7)
+  - SDWebImage (4.4.4):
+    - SDWebImage/Core (= 4.4.4)
+  - SDWebImage/Core (4.4.4)
+  - YLCore (0.1.0)
+  - YLHttp (0.1.2):
+    - AFNetworking
+    - YLCore
+  - YLUIExt (0.1.3):
+    - SDWebImage
+    - YLCore
+  - ZLPhotoBrowser (2.7.7):
+    - GPUImage
+    - SDWebImage
+
+DEPENDENCIES:
+  - YLHttp
+  - YLUIExt
+  - ZLPhotoBrowser
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - AFNetworking
+    - GPUImage
+    - SDWebImage
+    - YLCore
+    - YLHttp
+    - YLUIExt
+    - ZLPhotoBrowser
+
+SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
+  SDWebImage: c00ec18ab25d10e5ffac109b0f78d1b4341c9691
+  YLCore: cd9fbd6c395f8a4db76988e511eea3404bf4ce40
+  YLHttp: 5729b14bd756653cada2799c92de58d6fcc8026a
+  YLUIExt: 177ccb1d67d717117ccc35329dd93f4ca311ce16
+  ZLPhotoBrowser: ef9d5cdc9fdc8ce029fd0e41223e8eb8a642918f
+
+PODFILE CHECKSUM: df3210cb04934aa084b9b8390899fa02dde4e135
+
+COCOAPODS: 1.5.0
