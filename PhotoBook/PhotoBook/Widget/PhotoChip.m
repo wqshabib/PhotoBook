@@ -7,6 +7,7 @@
 //
 
 #import "PhotoChip.h"
+#import "UIImage+CropImage.h"
 
 @implementation PhotoChip
 
@@ -32,6 +33,7 @@
         // 相片位置
         YLImageView *photoImageView = [[YLImageView alloc]initWithFrame:photoRealRect];
         [self addSubview:photoImageView];
+//        photoImageView.contentMode = UIViewContentModeTopLeft;
         self.photoImageView = photoImageView;
         
         // 边框位置
@@ -54,6 +56,8 @@
 -(void)addRealPhoto:(NSString*)imageUrl {
     self.photoImageView.imageUrl = imageUrl;
 }
+
+
 
 -(void)addBorderImage:(NSString*)imageUrl{
     self.borderImageView.imageUrl = imageUrl;

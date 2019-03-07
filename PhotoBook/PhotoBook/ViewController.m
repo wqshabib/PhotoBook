@@ -11,6 +11,7 @@
 #import "SummaryCell.h"
 #import "ManagerPhotoViewController.h"
 #import "PhotoChip.h"
+#import "UIImage+CropImage.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -152,9 +153,48 @@
             
             PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
             [tmpView addSubview:chip];
-            [chip addRealPhoto:@"https://ss0.baidu.com/73t1bjeh1BF3odCf/it/u=277804562,2042153658&fm=85&s=2F00DF4B8576958C371C78230300E0D0"];
+            
+            
+            // 相位数据,比例
+            double photoWidth = rectPhotos.size.width;
+            double photoHeight = rectPhotos.size.height;
+            double photoDiv = rectPhotos.size.width /  rectPhotos.size.height;
+            
+            // 图片数据,比例
+            
+            UIImage *selectImage = [UIImage imageNamed:@"tmp_pic"];
+            double picWidth = selectImage.size.width;
+            double picHeight = selectImage.size.height;
+            double picDiv = selectImage.size.width /  selectImage.size.height;
+            
+            double cropX = 0;
+            double cropY = 0;
+            double cropW = 0;
+            double cropH = 0;
+            
+            // 图片中位 剪切 区域计算 （自适应）
+            
+            // 图片长宽比 > 相位长宽比 ，h = 图片高度, w = 截取中间
+            if (picDiv > photoDiv) {
+                cropH = picHeight;
+                cropY = 0;
+                cropW = picHeight * photoDiv;
+                cropX = (picWidth - cropW) * 0.5;
+            }
+            // 图片长宽比 < 相位长宽比 ， w = 图片宽度 h 取中间部分
+            else {
+                cropW = picWidth;
+                cropX = 0;
+                cropH = picWidth / photoDiv;
+                cropY = (picHeight - cropH) * 0.5;
+            }
+            
+            chip.photoImageView.image = [selectImage imageByCropToRect:CGRectMake(cropX, cropY, cropW, cropH)];
+            
             [chip addBorderImage:photo.image];
             [chip roate:photo.rotate];
+            
+//            chip.photoImageView.image = [chip.photoImageView.image imageByCropToRect:CGRectMake(0, 0, rectPhotos.size.width, rectPhotos.size.height)];
         }
     }
 }
