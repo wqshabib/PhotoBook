@@ -7,7 +7,5 @@ target 'PhotoBook' do
 pod 'ZLPhotoBrowser'
 pod 'YLHttp'
 pod 'YLUIExt'
-pod 'TOCropViewController'
-
 
 end
