@@ -32,15 +32,21 @@
 // 上报数据：
 
 /*
+ 
+ 
  "imgId": 1213,
  "imgSrc": "http:\/\/diy.h5.keepii.com\/uploads\/photo\/941in\/19\/02\/19\/thumb_11437514375c6b68d8e7ce46.92204605.jpeg",
+ 
  "rwidth": 562,
  "rheight": 750,
  "swidth": 562,
  "sheight": 375,
+
  "sx": 0,
  "sy": 188,
  "rotate": 0,
+ 
+ 
  */
 
 @property (nonatomic, copy) NSString *imgSrc;// 图片缩略图
@@ -84,6 +90,16 @@
 @property (nonatomic, copy) NSNumber *x;
 @property (nonatomic, copy) NSNumber *y;
 @property (nonatomic, copy) NSNumber *zIndex;
+
+// 客户端系统自定义
+// 相位ID 编码方式 最大10个  0001 代表page1 中1号 ， 0100.代表page2 中1号
+@property (nonatomic, assign) NSInteger photoId;
+// 是否被选中
+@property (nonatomic, assign) BOOL isSelected;
+// 原图
+@property (nonatomic,strong) UIImage *originalImage;
+
+
 @end
 
 

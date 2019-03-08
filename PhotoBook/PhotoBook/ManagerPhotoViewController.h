@@ -16,6 +16,11 @@ typedef void (^ManagerPhotoChooseOnePhoto)(PhotoCellData *data);
 
 @property (nonatomic,copy) ManagerPhotoChooseOnePhoto chooseOnePhoto;
 
+
+typedef void (^ManagerPhotoChooseOnePhotoImage)(UIImage *image);
+
+@property (nonatomic,copy) ManagerPhotoChooseOnePhotoImage chooseOnePhotoImage;
+
 @property (nonatomic,assign) BOOL isPick;
 
 @end

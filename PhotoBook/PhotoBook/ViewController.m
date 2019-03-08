@@ -12,6 +12,7 @@
 #import "ManagerPhotoViewController.h"
 #import "PhotoChip.h"
 #import "UIImage+CropImage.h"
+#import "TOCropViewController.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -32,7 +33,7 @@
 // 缩放比例 0 - 1
 @property (nonatomic,assign) double ratio;
 // 当前页
-@property (nonatomic,assign) NSInteger selectIndex;
+@property (nonatomic,assign) NSInteger selectPaperIndex;
 // 当前页数据
 @property (nonatomic,strong) Paper *selectPaper;
 // 工作区宽度
@@ -45,6 +46,8 @@
 @property (strong, nonatomic) NSMutableArray<UIView*> *cavasPages;
 // 相册控制器
 @property (nonatomic,strong) ManagerPhotoViewController *managerPhotoVC;
+// PhotoId
+@property (nonatomic,assign) NSInteger selectPhotoId;
 
 @end
 
@@ -78,7 +81,7 @@
     CGRect cavasFrame = CGRectMake(0, 0, pw * self.ratio, ph * self.ratio);
     UIView *canvas = [[UIView alloc]initWithFrame:cavasFrame];
     [self.workSpaceView addSubview:canvas];
-    canvas.backgroundColor = [UIColor redColor];
+    canvas.backgroundColor = [UIColor clearColor];
     canvas.center = [self.workSpaceView convertPoint:self.workSpaceView.center fromView:self.workSpaceView];
     self.cavasFrame = canvas.frame;
     self.cavas = canvas;
@@ -145,61 +148,36 @@
         for (int k = 0; k < data.photos.count ; k++) {
             Photos *photo = data.photos[k];
             
-            CGRect rectPhotos = [self getPhotoChipRawRect:photo];
-            CGRect miniRectFrame = [self toMiniRect:rectPhotos ratio:self.ratio];
-            
-            CGRect rectRealPhotos = [self getRealPhotoOffSetRawRect:photo];
-            CGRect miniRealRectFrame = [self toMiniRect:rectRealPhotos ratio:self.ratio];
+            CGRect miniRectFrame = [self toMiniRect:[self getPhotoChipRawRect:photo] ratio:self.ratio];
+            CGRect miniRealRectFrame = [self toMiniRect:[self getRealPhotoOffSetRawRect:photo] ratio:self.ratio];
             
             PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
             [tmpView addSubview:chip];
             
-            
-            // 相位数据,比例
-            double photoWidth = rectPhotos.size.width;
-            double photoHeight = rectPhotos.size.height;
-            double photoDiv = rectPhotos.size.width /  rectPhotos.size.height;
-            
-            // 图片数据,比例
-            
-            UIImage *selectImage = [UIImage imageNamed:@"tmp_pic"];
-            double picWidth = selectImage.size.width;
-            double picHeight = selectImage.size.height;
-            double picDiv = selectImage.size.width /  selectImage.size.height;
-            
-            double cropX = 0;
-            double cropY = 0;
-            double cropW = 0;
-            double cropH = 0;
-            
-            // 图片中位 剪切 区域计算 （自适应）
-            
-            // 图片长宽比 > 相位长宽比 ，h = 图片高度, w = 截取中间
-            if (picDiv > photoDiv) {
-                cropH = picHeight;
-                cropY = 0;
-                cropW = picHeight * photoDiv;
-                cropX = (picWidth - cropW) * 0.5;
+            if (photo.originalImage != nil) {
+               chip.photoImageView.image = [photo.originalImage imageByCropToRect:
+                                            [self caculateRect:photo image:photo.originalImage]];
             }
-            // 图片长宽比 < 相位长宽比 ， w = 图片宽度 h 取中间部分
-            else {
-                cropW = picWidth;
-                cropX = 0;
-                cropH = picWidth / photoDiv;
-                cropY = (picHeight - cropH) * 0.5;
-            }
-            
-            chip.photoImageView.image = [selectImage imageByCropToRect:CGRectMake(cropX, cropY, cropW, cropH)];
             
             [chip addBorderImage:photo.image];
             [chip roate:photo.rotate];
+            chip.button.tag = photo.photoId;
             
-//            chip.photoImageView.image = [chip.photoImageView.image imageByCropToRect:CGRectMake(0, 0, rectPhotos.size.width, rectPhotos.size.height)];
+            NSLog(@"photoId = %06td",photo.photoId);
+            
+            WEAK(self)
+            chip.button.onPress = ^(YLButton *button) {
+                STRONG(self)
+                self.selectPhotoId = button.tag;
+                [self onPressSelectLoc:button];
+            };
+            
         }
     }
 }
 
--(void)onPressSelectLoc:(YLButton*)button {
+-(void)onPressSelectLoc:(YLButton*)button{
+    
     // button.backgroundColor = COLORA(102,187,106,0.8);
     // 动画
     /*
@@ -207,7 +185,7 @@
     CABasicAnimation *an = [self opacityForeverAnimation:0.5];
     [button.layer addAnimation:an forKey:nil];
      */
-    [self pushToPhotoManager:YES];
+    [self pushToPhotoManager:YES photoId:button.tag];
 }
 
 -(CABasicAnimation *)opacityForeverAnimation:(float)time {
@@ -227,7 +205,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.selectIndex = 0;
+    self.selectPaperIndex = 0;
+    self.selectPhotoId = 0;
     [self setupNavBarButtons];
     [self initTable];
     [self requestInitData];
@@ -240,38 +219,6 @@
     self.summaryTableView.dataSource = self;
 }
 
-
--(void)requestGenerate {
-    WEAK(self)
-    [YLHttpTool POST:URL_Genearate params:@{@"prodSn":kProdSn} success:^(NSDictionary *JSON) {
-        STRONG(self)
-        GenerateResponse *resp = (GenerateResponse*)[GenerateResponse toModel:JSON];
-        if (resp.status != 0) {
-            return;
-        }
-        self.templateData = [[TemplateData alloc]init];
-        self.templateData.tmplData = resp.data.prodData;
-        // 重新排序
-        self.templateData = [self sortTemplateData];
-//        NSLog(@"%@",self.templateData.prodSn);
-        [self.summaryTableView reloadData];
-        self.workSpaceFrame = self.workSpaceView.frame;
-        
-        if (self.templateData.tmplData.count > 0) {
-            TmplData *data = self.templateData.tmplData[0];
-            Paper *paper = data.paper;
-            self.selectPaper = paper;
-            self.selectIndex = 0;
-            [self calculateRatio];
-            [self setState];
-        }
-        
-    } failure:^(NSError *error) {
-        //
-    }];
-}
-
-
 -(void)requestInitData {
     WEAK(self)
     [YLHttpTool POST:URL_INIT params:@{@"prodSn":kProdSn} success:^(NSDictionary *JSON) {
@@ -283,6 +230,8 @@
         self.templateData = resp.data;
         // 重新排序
         self.templateData = [self sortTemplateData];
+        // 打标签
+        self.templateData = [self addPhotoIdToPhotos];
         
         NSLog(@"%@",self.templateData.prodSn);
         [self.summaryTableView reloadData];
@@ -292,7 +241,7 @@
             TmplData *data = self.templateData.tmplData[0];
             Paper *paper = data.paper;
             self.selectPaper = paper;
-            self.selectIndex = 0;
+            self.selectPaperIndex = 0;
             [self calculateRatio];
             [self setState];
         }
@@ -343,7 +292,7 @@
         TmplData *data = self.templateData.tmplData[indexPath.row];
         Paper *paper = data.paper;
         self.selectPaper = paper;
-        self.selectIndex = indexPath.row;
+        self.selectPaperIndex = indexPath.row;
         [self calculateRatio];
         [self setState];
     };
@@ -361,34 +310,84 @@
 }
 
 -(void)onEnterAlbum {
-    [self pushToPhotoManager:NO];
+    [self pushToPhotoManager:NO photoId:0];
 }
 
 
-
--(void)pushToPhotoManager:(BOOL)isPick {
+-(void)pushToPhotoManager:(BOOL)isPick photoId:(NSInteger)photoId {
     if (self.managerPhotoVC == nil) {
         UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         self.managerPhotoVC =  [story instantiateViewControllerWithIdentifier:@"ManagerPhotoViewController"];
         self.managerPhotoVC.isPick = isPick;
         [self.navigationController pushViewController:self.managerPhotoVC animated:YES];
-        WEAK(self)
-        self.managerPhotoVC.chooseOnePhoto = ^(PhotoCellData * _Nonnull data) {
-            STRONG(self)
-            NSLog(@"%@",data.data.imgUrl);
-        };
+        [self handleChooseOnePhotoImage:photoId];
     }
     else {
         self.managerPhotoVC.isPick = isPick;
         [self.navigationController pushViewController:self.managerPhotoVC animated:YES];
-        WEAK(self)
-        self.managerPhotoVC.chooseOnePhoto = ^(PhotoCellData * _Nonnull data) {
-            STRONG(self)
-            NSLog(@"%@",data.data.imgUrl);
-        };
+        [self handleChooseOnePhotoImage:photoId];
     }
   
 }
+
+
+
+-(CGRect)caculateRect:(Photos*)photo image:(UIImage*)photoImage{
+    
+    CGRect rectPhotos = [self getPhotoChipRawRect:photo];
+    
+    double photoDiv     = rectPhotos.size.width /  rectPhotos.size.height;
+    
+    double picWidth     = photoImage.size.width;
+    double picHeight    = photoImage.size.height;
+    double picDiv       = photoImage.size.width /  photoImage.size.height;
+    
+    double cropX = 0;
+    double cropY = 0;
+    double cropW = 0;
+    double cropH = 0;
+    
+    // 图片中位 剪切 区域计算 （自适应）
+    
+    // 图片长宽比 > 相位长宽比 ，h = 图片高度, w = 截取中间
+    if (picDiv > photoDiv) {
+        cropH = picHeight;
+        cropY = 0;
+        cropW = picHeight * photoDiv;
+        cropX = (picWidth - cropW) * 0.5;
+    }
+    // 图片长宽比 < 相位长宽比 ， w = 图片宽度 h 取中间部分
+    else {
+        cropW = picWidth;
+        cropX = 0;
+        cropH = picWidth / photoDiv;
+        cropY = (picHeight - cropH) * 0.5;
+    }
+    return CGRectMake(cropX, cropY, cropW, cropH);
+}
+
+-(void)handleChooseOnePhotoImage:(NSInteger)photoId {
+    
+    Photos * photo = [self findPhotoWithPhotoId:photoId];
+    
+    WEAK(self)
+    self.managerPhotoVC.chooseOnePhotoImage = ^(UIImage * _Nonnull image) {
+        STRONG(self)
+               
+        CGRect cropRect =[self caculateRect:photo image:image];
+        
+        TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
+        //           cropController.delegate = self;
+        cropController.angle = 0;
+        cropController.imageCropFrame = cropRect;
+        cropController.aspectRatioLockEnabled = YES;
+        cropController.resetButtonHidden = YES;
+        cropController.aspectRatioPickerButtonHidden = YES;
+        [self presentViewController:cropController animated:YES completion:nil];
+    };
+}
+
+
 
 -(TemplateData*)sortTemplateData {
     for (TmplData *tmplData in self.templateData.tmplData) {
@@ -406,4 +405,58 @@
     return self.templateData;
 }
 
+
+// 为每个photo打一个标志
+-(TemplateData*)addPhotoIdToPhotos {
+    for (int i = 0 ; i <  self.templateData.tmplData.count ; i++) {
+        TmplData *tmplData =  self.templateData.tmplData[i];
+        Paper *paper = tmplData.paper;
+        for (int j = 0; j < paper.page.count ; j++) {
+            Page *page = paper.page[j];
+            Data *data = page.data;
+            for (int k = 0; k < data.photos.count ; k++) {
+                Photos *photo = data.photos[k];
+                photo.photoId =  i *1000 + j * 100 + k;
+                photo.isSelected = NO;
+                NSLog(@"photoId TAG = %06td",photo.photoId);
+            }
+        }
+    }
+    return self.templateData;
+}
+
+-(Photos*)findPhotoWithPhotoId:(NSInteger)photoId{
+    for (TmplData *tmplData in self.templateData.tmplData) {
+        Paper *paper = tmplData.paper;
+        for (int i = 0; i < paper.page.count ; i++) {
+            Page *page = paper.page[i];
+            Data *data = page.data;
+            for (int k = 0; k < data.photos.count ; k++) {
+                Photos *photo = data.photos[k];
+                if (photo.photoId == photoId) {
+                    return photo;
+                }
+            }
+        }
+    }
+    return nil;
+}
+
+-(void)writePhotosWithId:(NSInteger)photoId editPhoto:(Photos*)editPhoto {
+    for (TmplData *tmplData in self.templateData.tmplData) {
+        Paper *paper = tmplData.paper;
+        for (int i = 0; i < paper.page.count ; i++) {
+            Page *page = paper.page[i];
+            Data *data = page.data;
+            for (int k = 0; k < data.photos.count ; k++) {
+                Photos *photo = data.photos[k];
+                if (photo.photoId == photoId) {
+                    if (editPhoto) {
+                        photo = editPhoto;
+                    }
+                }
+            }
+        }
+    }
+}
 @end

@@ -156,7 +156,7 @@
         [self syncAndSetSelectedAllNo];
         [self.photoCollectionView reloadData];
         // 上传照片
-        [self postUpLoadPhoto];
+//        [self postUpLoadPhoto];
     }];
     //调用相册
     [ac showPreviewAnimated:YES];
@@ -174,7 +174,8 @@
     cell.button.onPress = ^(YLButton *button) {
         STRONG(self)
         if (self.isPick == YES) {
-            BLOCK_EXEC(self.chooseOnePhoto,PhotoCellData);
+            BLOCK_EXEC(self.chooseOnePhotoImage,cell.photoImageView.image);
+//            BLOCK_EXEC(self.chooseOnePhoto,PhotoCellData);
             [self.navigationController popViewControllerAnimated:YES];
             return;
         }
