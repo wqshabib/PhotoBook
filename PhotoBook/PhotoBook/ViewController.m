@@ -22,7 +22,7 @@
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
 
-@interface ViewController ()<UITableViewDelegate,UITableViewDataSource>
+@interface ViewController ()<UITableViewDelegate,UITableViewDataSource,TOCropViewControllerDelegate>
 
 // 本地数据源
 @property (nonatomic,strong) TemplateData *templateData;
@@ -377,7 +377,7 @@
         CGRect cropRect =[self caculateRect:photo image:image];
         
         TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
-        //           cropController.delegate = self;
+        cropController.delegate = self;
         cropController.angle = 0;
         cropController.imageCropFrame = cropRect;
         cropController.aspectRatioLockEnabled = YES;
@@ -386,6 +386,18 @@
         [self presentViewController:cropController animated:YES completion:nil];
     };
 }
+
+#pragma mark - Cropper Delegate -
+- (void)cropViewController:(TOCropViewController *)cropViewController didCropToImage:(UIImage *)image withRect:(CGRect)cropRect angle:(NSInteger)angle {
+    
+    Photos * photo = [self findPhotoWithPhotoId:self.selectPhotoId];
+    photo.originalImage = image;
+    [self writePhotosWithId:self.selectPhotoId editPhoto:photo];
+    
+    [self setState];
+    [cropViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
 
 
 
