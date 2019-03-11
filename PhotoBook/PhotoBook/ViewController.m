@@ -383,6 +383,7 @@
         cropController.aspectRatioLockEnabled = YES;
         cropController.resetButtonHidden = YES;
         cropController.aspectRatioPickerButtonHidden = YES;
+        cropController.customAspectRatio = CGSizeMake(cropRect.size.width, cropRect.size.height);
         [self presentViewController:cropController animated:YES completion:nil];
     };
 }
