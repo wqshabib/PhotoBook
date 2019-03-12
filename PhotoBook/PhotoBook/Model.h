@@ -191,7 +191,7 @@
 
 @property (nonatomic, copy)   PKPhoto *data;
 @property (nonatomic, copy)   UIImage *image;
-
+@property (nonatomic, assign)   NSInteger taskId;
 @end
 
 

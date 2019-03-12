@@ -13,6 +13,7 @@
 #import "LXCollectionViewLeftOrRightAlignedLayout.h"
 #import "YLAlertView.h"
 #import "Model.h"
+#import "ProgressWidget.h"
 
 #define UPLOAD_PHOTO @"http://diy.h5.keepii.com/index.php?m=upload&a=photo"
 
@@ -30,12 +31,16 @@
 @property (weak, nonatomic) IBOutlet UIView *addView;
 
 @property (assign, nonatomic)  BOOL isInEdit;
+
 @property (strong, nonatomic) UIButton *editButton;
+@property (strong, nonatomic) UIButton *fillButton;
+@property (strong, nonatomic) UIButton *hideButton;
 
-
+// Gridview数据类型
 @property (strong, nonatomic) NSMutableArray<PhotoCellData*> *photos;
 @property (nonatomic,strong) NSMutableArray *selectFlagArray;
 
+@property (nonatomic,strong) ProgressWidget *progressWidget;
 @end
 
 @implementation ManagerPhotoViewController
@@ -77,6 +82,11 @@
     self.photos = [[NSMutableArray alloc]init];
     self.photoCollectionView.delegate = self;
     self.photoCollectionView.dataSource = self;
+    
+    
+    
+    self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
+    [self.view addSubview:self.progressWidget];
     
     WEAK(self)
     self.buttonAddPhoto.onPress = ^(YLButton *button) {
@@ -148,19 +158,79 @@
     [ac setSelectImageBlock:^(NSArray<UIImage *> * _Nonnull images, NSArray<PHAsset *> * _Nonnull assets, BOOL isOriginal) {
         //your codes
         STRONG(self)
-        for (UIImage *img in images) {
-            PhotoCellData *p = [[PhotoCellData alloc]init];
-            p.image = img;
-            [self.photos addObject:p];
-        }
-        [self syncAndSetSelectedAllNo];
-        [self.photoCollectionView reloadData];
-        // 上传照片
-//        [self postUpLoadPhoto];
+        [self postUploadPhoto:images];
     }];
     //调用相册
     [ac showPreviewAnimated:YES];
 }
+
+-(void)postUploadPhoto:(NSArray<UIImage *>*)images {
+    
+    
+    __block CGFloat step  = 0.9 /  images.count;
+    
+    NSString *msg = FORMAT(@"正在上传  1 / %d 张相片",(int)images.count);
+    [self.progressWidget show];
+    [self.progressWidget progress:0.1];
+    [self.progressWidget title:msg];
+    
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    NSLog(@"请求开始");
+    dispatch_group_async(group, queue, ^{
+        for (int i = 0; i < images.count; i++) {
+            PhotoCellData *p = [[PhotoCellData alloc]init];
+            p.image = images[i];
+            p.taskId = i;
+            
+            NSString *msg = FORMAT(@"正在上传  %d / %d 张相片",i+1,(int)images.count);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.progressWidget title:msg];
+            });
+            NSData *data = UIImagePNGRepresentation(p.image);
+            NSString *base64String = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            NSString *lastBase64 = FORMAT(@"%@%@",@"data:image/png;base64,",base64String);
+            WEAK(self)
+            [YLHttpTool POST:UPLOAD_PHOTO params:@{@"platTag":@"941in",@"img":lastBase64} success:^(NSDictionary *JSON){
+            STRONG(self)
+            dispatch_semaphore_signal(semaphore);
+            NSLog(@"--------上传成功 i = %i",i);
+            // 附着信息源
+            PKPhotoResponse *resp = (PKPhotoResponse*)[PKPhotoResponse toModel:JSON];
+            if (resp.status == 0) {
+                p.data = resp.data;
+                NSLog(@"成功返回 %@",p.data);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.progressWidget progress:0.1 + step*i];
+                });
+                [self.photos addObject:p];
+            }
+            } failure:^(NSError *error) {
+                NSLog(@"--------上传失败 i = %i",i);
+                dispatch_semaphore_signal(semaphore);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.progressWidget progress:0.1 + step*i];
+                });
+            }];
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        }
+    });
+     WEAK(self)
+    dispatch_group_notify(group, queue, ^{
+        STRONG(self)
+        dispatch_async(dispatch_get_main_queue(), ^{
+             NSLog(@"----全部请求完毕---");
+            [self.progressWidget title:@"上传已完成"];
+            [self.progressWidget hide];
+            [self.progressWidget progress:1];
+            [self syncAndSetSelectedAllNo];
+            [self.photoCollectionView reloadData];
+        });
+    });
+ 
+}
+
 
 
 - (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
@@ -192,16 +262,38 @@
 }
 
 
+
 - (void)setupNavBarButtons {
     UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
     editButton.frame = CGRectMake(0, 0, 40, 20);
     [editButton setTitle:@"选择" forState:UIControlStateNormal];
     editButton.backgroundColor = [UIColor clearColor];
     [editButton addTarget:self action:@selector(onPressEdit:) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *msgItemBtn = [[UIBarButtonItem alloc] initWithCustomView:editButton];
-    [self.navigationItem setRightBarButtonItem:msgItemBtn];
+    
+    UIButton *fillButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    fillButton.frame = CGRectMake(0, 0, 40, 20);
+    [fillButton setTitle:@"填充" forState:UIControlStateNormal];
+    fillButton.backgroundColor = [UIColor clearColor];
+    [fillButton addTarget:self action:@selector(onPressFill:) forControlEvents:UIControlEventTouchUpInside];
+    
+    
+    UIBarButtonItem *editButtonItem = [[UIBarButtonItem alloc] initWithCustomView:editButton];
+    UIBarButtonItem *fillButtonItem = [[UIBarButtonItem alloc] initWithCustomView:fillButton];
+    
+    [self.navigationItem setRightBarButtonItems:@[editButtonItem,fillButtonItem]];
+    
     self.editButton = editButton;
+    
 }
+
+-(void)onPressFill:(UIButton*)button {
+    NSLog(@"Fill");
+}
+
+
+
+
+
 
 -(void)onPressEdit:(UIButton*)button {
     self.isInEdit = !self.isInEdit;
@@ -246,29 +338,6 @@
 }
 
 
--(void)postUpLoadPhoto {
-    for (PhotoCellData *p in self.photos) {
-        UIImage *originImage = p.image;
-        __block NSInteger idx = [self.photos indexOfObject:p];
-        NSData *data = UIImagePNGRepresentation(originImage);
-        NSString *base64String = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-        NSString *lastBase64 = FORMAT(@"%@%@",@"data:image/png;base64,",base64String);
-        WEAK(self)
-        [YLHttpTool POST:UPLOAD_PHOTO params:@{@"platTag":@"941in",@"img":lastBase64}
-        success:^(NSDictionary *JSON){
-        STRONG(self)
-        NSLog(@"%@",JSON);
-        // 附着信息源
-        PKPhotoResponse *resp = (PKPhotoResponse*)[PKPhotoResponse toModel:JSON];
-        if (resp.status == 0) {
-            PhotoCellData *data =  self.photos[idx];
-            data.data = resp.data;
-        }
-        } failure:^(NSError *error) {
-            
-        }];
-    }
-}
 
 
 

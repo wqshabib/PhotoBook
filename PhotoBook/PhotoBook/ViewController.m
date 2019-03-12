@@ -373,7 +373,7 @@
     WEAK(self)
     self.managerPhotoVC.chooseOnePhotoImage = ^(UIImage * _Nonnull image) {
         STRONG(self)
-               
+        
         CGRect cropRect =[self caculateRect:photo image:image];
         
         TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];

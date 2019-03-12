@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		20118AFE2237A10A0071635A /* HWWaveView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AF62237A10A0071635A /* HWWaveView.m */; };
+		20118AFF2237A10A0071635A /* HWCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AF92237A10A0071635A /* HWCircleView.m */; };
+		20118B002237A10A0071635A /* HWProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AFB2237A10A0071635A /* HWProgressView.m */; };
+		20118B012237A10A0071635A /* HWInstallView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AFD2237A10A0071635A /* HWInstallView.m */; };
+		20118B042237A1C20071635A /* ProgressWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118B032237A1C20071635A /* ProgressWidget.m */; };
 		2016A911221FD1CB00CD08A0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2016A910221FD1CB00CD08A0 /* AppDelegate.m */; };
 		2016A914221FD1CB00CD08A0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2016A913221FD1CB00CD08A0 /* ViewController.m */; };
 		2016A917221FD1CB00CD08A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2016A915221FD1CB00CD08A0 /* Main.storyboard */; };
@@ -38,6 +43,16 @@
 
 /* Begin PBXFileReference section */
 		11337E3830937274F524F894 /* libPods-PhotoBook.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PhotoBook.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		20118AF62237A10A0071635A /* HWWaveView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWWaveView.m; sourceTree = "<group>"; };
+		20118AF72237A10A0071635A /* HWInstallView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWInstallView.h; sourceTree = "<group>"; };
+		20118AF82237A10A0071635A /* HWProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWProgressView.h; sourceTree = "<group>"; };
+		20118AF92237A10A0071635A /* HWCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWCircleView.m; sourceTree = "<group>"; };
+		20118AFA2237A10A0071635A /* HWWaveView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWWaveView.h; sourceTree = "<group>"; };
+		20118AFB2237A10A0071635A /* HWProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWProgressView.m; sourceTree = "<group>"; };
+		20118AFC2237A10A0071635A /* HWCircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWCircleView.h; sourceTree = "<group>"; };
+		20118AFD2237A10A0071635A /* HWInstallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWInstallView.m; sourceTree = "<group>"; };
+		20118B022237A1C20071635A /* ProgressWidget.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProgressWidget.h; sourceTree = "<group>"; };
+		20118B032237A1C20071635A /* ProgressWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProgressWidget.m; sourceTree = "<group>"; };
 		2016A90C221FD1CB00CD08A0 /* PhotoBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2016A90F221FD1CB00CD08A0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2016A910221FD1CB00CD08A0 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -126,6 +141,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		20118AF52237A10A0071635A /* HWProgressView */ = {
+			isa = PBXGroup;
+			children = (
+				20118AF62237A10A0071635A /* HWWaveView.m */,
+				20118AF72237A10A0071635A /* HWInstallView.h */,
+				20118AF82237A10A0071635A /* HWProgressView.h */,
+				20118AF92237A10A0071635A /* HWCircleView.m */,
+				20118AFA2237A10A0071635A /* HWWaveView.h */,
+				20118AFB2237A10A0071635A /* HWProgressView.m */,
+				20118AFC2237A10A0071635A /* HWCircleView.h */,
+				20118AFD2237A10A0071635A /* HWInstallView.m */,
+			);
+			path = HWProgressView;
+			sourceTree = "<group>";
+		};
 		2016A903221FD1CB00CD08A0 = {
 			isa = PBXGroup;
 			children = (
@@ -147,6 +177,7 @@
 		2016A90E221FD1CB00CD08A0 /* PhotoBook */ = {
 			isa = PBXGroup;
 			children = (
+				20118AF52237A10A0071635A /* HWProgressView */,
 				204931172232676F007CA3EC /* TOCropViewController */,
 				20426E88222E6C6700BF28EA /* CropImage */,
 				20426E84222E5BFC00BF28EA /* Widget */,
@@ -172,6 +203,8 @@
 				2073D02122250D6A00E70859 /* PhotoCell.m */,
 				2073D02322250E4700E70859 /* ManagerPhotoViewController.h */,
 				2073D02422250E4700E70859 /* ManagerPhotoViewController.m */,
+				20118B022237A1C20071635A /* ProgressWidget.h */,
+				20118B032237A1C20071635A /* ProgressWidget.m */,
 			);
 			path = PhotoBook;
 			sourceTree = "<group>";
@@ -460,18 +493,23 @@
 				2049314F2232676F007CA3EC /* TOCropToolbar.m in Sources */,
 				2016A914221FD1CB00CD08A0 /* ViewController.m in Sources */,
 				20426E8B222E6C6700BF28EA /* UIImage+CropImage.m in Sources */,
+				20118B002237A10A0071635A /* HWProgressView.m in Sources */,
+				20118AFE2237A10A0071635A /* HWWaveView.m in Sources */,
 				2016A91F221FD1CD00CD08A0 /* main.m in Sources */,
 				2016A911221FD1CB00CD08A0 /* AppDelegate.m in Sources */,
 				204931502232676F007CA3EC /* UIImage+CropRotate.m in Sources */,
+				20118B012237A10A0071635A /* HWInstallView.m in Sources */,
 				2049314D2232676F007CA3EC /* TOCropView.m in Sources */,
 				2016A930221FD40600CD08A0 /* RespObject.m in Sources */,
 				2016A928221FD33A00CD08A0 /* Model.m in Sources */,
+				20118B042237A1C20071635A /* ProgressWidget.m in Sources */,
 				209F954022237CAB006C82C8 /* SummaryCell.m in Sources */,
 				2016A931221FD40600CD08A0 /* JsonAdapter.m in Sources */,
 				202E69C72227D36900C52996 /* LXCollectionViewLeftOrRightAlignedLayout.m in Sources */,
 				2049314C2232676F007CA3EC /* TOCropScrollView.m in Sources */,
 				204931482232676F007CA3EC /* TOActivityCroppedImageProvider.m in Sources */,
 				2073D02522250E4700E70859 /* ManagerPhotoViewController.m in Sources */,
+				20118AFF2237A10A0071635A /* HWCircleView.m in Sources */,
 				2049314E2232676F007CA3EC /* TOCropOverlayView.m in Sources */,
 				2049314A2232676F007CA3EC /* TOCroppedImageAttributes.m in Sources */,
 			);
