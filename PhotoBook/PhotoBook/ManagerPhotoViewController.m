@@ -171,6 +171,7 @@
     
     NSString *msg = FORMAT(@"正在上传  1 / %d 张相片",(int)images.count);
     [self.progressWidget show];
+    [self.progressWidget progress:0];
     [self.progressWidget progress:0.1];
     [self.progressWidget title:msg];
     
@@ -202,7 +203,7 @@
                 p.data = resp.data;
                 NSLog(@"成功返回 %@",p.data);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.progressWidget progress:0.1 + step*i];
+                    [self.progressWidget progress:0.1 + step*(i+1)];
                 });
                 [self.photos addObject:p];
             }
@@ -210,7 +211,7 @@
                 NSLog(@"--------上传失败 i = %i",i);
                 dispatch_semaphore_signal(semaphore);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.progressWidget progress:0.1 + step*i];
+                    [self.progressWidget progress:0.1 + step*(i+1)];
                 });
             }];
             dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
@@ -221,11 +222,15 @@
         STRONG(self)
         dispatch_async(dispatch_get_main_queue(), ^{
              NSLog(@"----全部请求完毕---");
-            [self.progressWidget title:@"上传已完成"];
-            [self.progressWidget hide];
             [self.progressWidget progress:1];
-            [self syncAndSetSelectedAllNo];
-            [self.photoCollectionView reloadData];
+            [self.progressWidget title:@"上传已完成"];
+            GCD_AFTER(0.5, ^{
+                [self.progressWidget hide];
+                [self.progressWidget progress:0];
+                [self syncAndSetSelectedAllNo];
+                [self.photoCollectionView reloadData];
+            });
+
         });
     });
  

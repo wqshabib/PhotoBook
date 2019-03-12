@@ -123,7 +123,6 @@
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X5h-VA-LPl" userLabel="工具条">
                                         <rect key="frame" x="0.0" y="320" width="552" height="50"/>
-                                        <color key="backgroundColor" red="0.99953407049999998" green="0.98835557699999999" blue="0.47265523669999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="pTg-VG-4sm"/>
                                         </constraints>
@@ -136,7 +135,7 @@
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
                                         </subviews>
-                                        <color key="backgroundColor" red="0.64313725489999995" green="0.64705882349999999" blue="0.65098039220000004" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="bottom" secondItem="7bQ-kg-fe9" secondAttribute="bottom" id="B4t-X7-HUj"/>
                                             <constraint firstItem="7bQ-kg-fe9" firstAttribute="leading" secondItem="aeA-bx-LMF" secondAttribute="leading" id="Yud-Si-BzW"/>

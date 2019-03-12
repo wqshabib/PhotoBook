@@ -33,7 +33,7 @@
         self.labelTile.center = self.center;
         self.labelTile.text = @"";
         self.labelTile.textColor = [UIColor blackColor];
-        self.labelTile.font = [UIFont systemFontOfSize:30.0];
+        self.labelTile.font = [UIFont systemFontOfSize:22.0];
         [self addSubview:self.labelTile];
     }
     return self;
