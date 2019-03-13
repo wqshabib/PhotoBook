@@ -80,3 +80,12 @@
 
 @end
 
+
+@implementation PreviewData
+
+@end
+
+@implementation PreviewResponse
+
+@end
+

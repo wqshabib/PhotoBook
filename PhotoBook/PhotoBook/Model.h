@@ -215,3 +215,16 @@
 
 @end
 
+
+
+// Preview返回
+
+@interface PreviewData : Response
+@property (nonatomic, copy)   NSString *imgUrl;
+@end
+
+
+@interface PreviewResponse : Response
+@property (nonatomic, copy)   PreviewData *data;
+@end
+

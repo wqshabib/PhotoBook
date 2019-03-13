@@ -600,16 +600,17 @@
                     [self.progressWidget progress:0.1 + step*(i+1)];
                 });
                 
-//                // 附着信息源
-//                PKPhotoResponse *resp = (PKPhotoResponse*)[PKPhotoResponse toModel:JSON];
-//                if (resp.status == 0) {
-//                    p.data = resp.data;
-//                    NSLog(@"成功返回 %@",p.data);
-//
-//                }
-                
-                
-                
+                // 附着信息源
+                PreviewResponse *resp = (PreviewResponse*)[PreviewResponse toModel:JSON];
+                if (resp.status == 0) {
+                    NSString *preUrl = resp.data.imgUrl;
+                    NSLog(@"成功返回预览图地址: %@",preUrl);
+                    
+                    // 拼接上previewImage
+                    Paper *paper =   self.templateData.tmplData[i].paper;
+                    paper.previewImage = [preUrl copy];
+                    self.templateData.tmplData[i].paper = paper;
+                }
                 
             } failure:^(NSError *error) {
                 NSLog(@"--------上传失败 i = %i",i);
