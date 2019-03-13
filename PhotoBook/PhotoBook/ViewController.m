@@ -14,12 +14,15 @@
 #import "UIImage+CropImage.h"
 #import "TOCropViewController.h"
 #import "UIView+Category.h"
+#import "ProgressWidget.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
 #define URL_Genearate @"http://diy.h5.keepii.com/index.php?m=diy&a=generate"
 
 #define kProdSn @"20190222153837-3-4-13206737285c6fa6fdb03b32.42716265"
+
+#define URL_UploadPreview @"http://diy.h5.keepii.com/index.php?m=upload&a=prodPreview"
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
 
@@ -54,6 +57,10 @@
 
 
 @property (strong, nonatomic) NSMutableArray<UIImage*> *previewImagesArray;
+
+
+@property (nonatomic,strong) ProgressWidget *progressWidget;
+
 
 @end
 
@@ -225,6 +232,10 @@
     [self initTable];
     [self requestInitData];
 //    [self requestGenerate];
+    
+    self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
+    [self.view addSubview:self.progressWidget];
+    
 }
 
 -(void)initTable{
@@ -247,8 +258,6 @@
         // 打标签
         self.templateData = [self addPhotoIdToPhotos];
         
-        NSLog(@"%@",self.templateData.prodSn);
-        
         self.workSpaceFrame = self.workSpaceView.frame;
         
         if (self.templateData.tmplData.count > 0) {
@@ -260,6 +269,7 @@
             [self setState];
             [self fillPreViewImageArray];
         }
+
         
         [self.summaryTableView reloadData];
         
@@ -349,8 +359,7 @@
 
 
 -(void)onSaveAlbum {
-    UIImage *image = [self.cavas convertToImage];
-    self.previewImageView.image = image;
+    [self postUploadPreViewPhoto:self.previewImagesArray];
 }
 
 -(void)buildUpPreViewImage {
@@ -416,31 +425,52 @@
 
 -(void)handleChooseOnePhotoImage:(NSInteger)photoId {
     
-    Photos * photo = [self findPhotoWithPhotoId:photoId];
-    
     WEAK(self)
-    self.managerPhotoVC.chooseOnePhotoImage = ^(UIImage * _Nonnull image) {
+    self.managerPhotoVC.chooseOnePhotoImage = ^(PhotoCellData *celldata) {
         STRONG(self)
+        Photos * photo = [self findPhotoWithPhotoId:photoId];
+        photo = [self decoratePhotosWithCellData:photo celldata:celldata];
+        [self writePhotosWithId:photoId editPhoto:photo];
         
-        CGRect cropRect =[self caculateRect:photo image:image];
-        
-        TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
+        CGRect defaultCropRect =[self caculateRect:photo image:celldata.image];
+        TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:celldata.image];
         cropController.delegate = self;
         cropController.angle = 0;
-        cropController.imageCropFrame = cropRect;
+        cropController.imageCropFrame = defaultCropRect;
         cropController.aspectRatioLockEnabled = YES;
         cropController.resetButtonHidden = YES;
         cropController.aspectRatioPickerButtonHidden = YES;
-        cropController.customAspectRatio = CGSizeMake(cropRect.size.width, cropRect.size.height);
+        cropController.customAspectRatio = CGSizeMake(defaultCropRect.size.width, defaultCropRect.size.height);
         [self presentViewController:cropController animated:YES completion:nil];
     };
 }
+
+
+-(Photos*)decoratePhotosWithCellData:(Photos*)photos celldata:(PhotoCellData*)celldata {
+    photos.sourceImg.imgId      = celldata.data.imgId;
+    photos.sourceImg.imgSrc     = celldata.data.imgUrl;
+    photos.sourceImg.rwidth     = @(celldata.image.size.width);
+    photos.sourceImg.rheight    = @(celldata.image.size.height);
+    return photos;
+}
+
+-(Photos*)decoratePhotosWithCropRect:(Photos*)photos cropRect:(CGRect)cropRect angle:(NSInteger)angle {
+    photos.sourceImg.sx = @(cropRect.origin.x);
+    photos.sourceImg.sy = @(cropRect.origin.y);
+    photos.sourceImg.swidth = @(cropRect.size.width);
+    photos.sourceImg.sheight = @(cropRect.size.height);
+    photos.sourceImg.rotate = @(angle);
+    
+    return photos;
+}
+
 
 #pragma mark - Cropper Delegate -
 - (void)cropViewController:(TOCropViewController *)cropViewController didCropToImage:(UIImage *)image withRect:(CGRect)cropRect angle:(NSInteger)angle {
     
     Photos * photo = [self findPhotoWithPhotoId:self.selectPhotoId];
     photo.originalImage = image;
+    photo = [self decoratePhotosWithCropRect:photo cropRect:cropRect angle:angle];
     [self writePhotosWithId:self.selectPhotoId editPhoto:photo];
     
     [self setState];
@@ -530,6 +560,82 @@
             }
         }
     }
+}
+
+
+
+-(void)postUploadPreViewPhoto:(NSArray<UIImage *>*)images {
+    
+    __block CGFloat step  = 0.9 /  images.count;
+    
+    NSString *msg = FORMAT(@"正在上传  1 / %d 张预览图",(int)images.count);
+    [self.progressWidget show];
+    [self.progressWidget progress:0];
+    [self.progressWidget progress:0.1];
+    [self.progressWidget title:msg];
+    
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    NSLog(@"请求开始");
+    dispatch_group_async(group, queue, ^{
+        for (int i = 0; i < images.count; i++) {
+            PhotoCellData *p = [[PhotoCellData alloc]init];
+            p.image = images[i];
+            p.taskId = i;
+            
+            NSString *msg = FORMAT(@"正在上传  %d / %d 张缩略图",i+1,(int)images.count);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.progressWidget title:msg];
+            });
+            NSData *data = UIImagePNGRepresentation(p.image);
+            NSString *base64String = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            NSString *lastBase64 = FORMAT(@"%@%@",@"data:image/png;base64,",base64String);
+            WEAK(self)
+            [YLHttpTool POST:URL_UploadPreview params:@{@"prodSn":self.templateData.prodSn,@"img":lastBase64} success:^(NSDictionary *JSON){
+                STRONG(self)
+                dispatch_semaphore_signal(semaphore);
+                NSLog(@"--------上传成功 i = %i",i);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.progressWidget progress:0.1 + step*(i+1)];
+                });
+                
+//                // 附着信息源
+//                PKPhotoResponse *resp = (PKPhotoResponse*)[PKPhotoResponse toModel:JSON];
+//                if (resp.status == 0) {
+//                    p.data = resp.data;
+//                    NSLog(@"成功返回 %@",p.data);
+//
+//                }
+                
+                
+                
+                
+            } failure:^(NSError *error) {
+                NSLog(@"--------上传失败 i = %i",i);
+                dispatch_semaphore_signal(semaphore);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.progressWidget progress:0.1 + step*(i+1)];
+                });
+            }];
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        }
+    });
+    WEAK(self)
+    dispatch_group_notify(group, queue, ^{
+        STRONG(self)
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"----全部请求完毕---");
+            [self.progressWidget progress:1];
+            [self.progressWidget title:@"上传已完成"];
+            GCD_AFTER(0.5, ^{
+                [self.progressWidget hide];
+                [self.progressWidget progress:0];
+            });
+            
+        });
+    });
+    
 }
 
 @end

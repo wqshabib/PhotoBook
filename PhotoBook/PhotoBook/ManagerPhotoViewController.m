@@ -197,14 +197,15 @@
             STRONG(self)
             dispatch_semaphore_signal(semaphore);
             NSLog(@"--------上传成功 i = %i",i);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.progressWidget progress:0.1 + step*(i+1)];
+            });
             // 附着信息源
             PKPhotoResponse *resp = (PKPhotoResponse*)[PKPhotoResponse toModel:JSON];
             if (resp.status == 0) {
                 p.data = resp.data;
                 NSLog(@"成功返回 %@",p.data);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.progressWidget progress:0.1 + step*(i+1)];
-                });
+        
                 [self.photos addObject:p];
             }
             } failure:^(NSError *error) {
@@ -239,9 +240,9 @@
 
 
 - (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
-    PhotoCellData *PhotoCellData = self.photos[indexPath.row];
+    PhotoCellData *celldata = self.photos[indexPath.row];
     PhotoCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"PhotoCell" forIndexPath:indexPath];
-    cell.photoImageView.image = PhotoCellData.image;
+    cell.photoImageView.image = celldata.image;
     cell.isEdit = self.isInEdit;
     BOOL isSelected = [self.selectFlagArray[indexPath.row] boolValue];
     cell.isHaveSelected = isSelected;
@@ -249,7 +250,7 @@
     cell.button.onPress = ^(YLButton *button) {
         STRONG(self)
         if (self.isPick == YES) {
-            BLOCK_EXEC(self.chooseOnePhotoImage,cell.photoImageView.image);
+            BLOCK_EXEC(self.chooseOnePhotoImage,celldata);
 //            BLOCK_EXEC(self.chooseOnePhoto,PhotoCellData);
             [self.navigationController popViewControllerAnimated:YES];
             return;

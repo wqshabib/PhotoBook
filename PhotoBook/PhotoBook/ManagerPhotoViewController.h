@@ -12,12 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ManagerPhotoViewController : UIViewController
 
-typedef void (^ManagerPhotoChooseOnePhoto)(PhotoCellData *data);
-
-@property (nonatomic,copy) ManagerPhotoChooseOnePhoto chooseOnePhoto;
-
-
-typedef void (^ManagerPhotoChooseOnePhotoImage)(UIImage *image);
+typedef void (^ManagerPhotoChooseOnePhotoImage)(PhotoCellData *data);
 
 @property (nonatomic,copy) ManagerPhotoChooseOnePhotoImage chooseOnePhotoImage;
 
