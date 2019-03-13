@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) IBOutlet YLImageView *leftImageView;
 @property (weak, nonatomic) IBOutlet YLImageView *rightImageView;
 @property (weak, nonatomic) IBOutlet YLButton *button;
+@property (weak, nonatomic) IBOutlet UIImageView *previewImageView;
+@property (weak, nonatomic) IBOutlet UILabel *lbPageNumber;
 
 @end
 

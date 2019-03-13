@@ -23,6 +23,12 @@ typedef void (^ManagerPhotoChooseOnePhotoImage)(UIImage *image);
 
 @property (nonatomic,assign) BOOL isPick;
 
+
+// 填充返回
+typedef void (^ManagerPhotoAutoFill)(NSMutableArray<PhotoCellData*> *cellDatas);
+
+@property (nonatomic,copy) ManagerPhotoAutoFill autoFill;
+
 @end
 
 NS_ASSUME_NONNULL_END

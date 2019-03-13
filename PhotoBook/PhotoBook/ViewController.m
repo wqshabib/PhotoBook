@@ -13,6 +13,7 @@
 #import "PhotoChip.h"
 #import "UIImage+CropImage.h"
 #import "TOCropViewController.h"
+#import "UIView+Category.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -49,10 +50,23 @@
 // PhotoId
 @property (nonatomic,assign) NSInteger selectPhotoId;
 
+@property (weak, nonatomic) IBOutlet UIImageView *previewImageView;
+
+
+@property (strong, nonatomic) NSMutableArray<UIImage*> *previewImagesArray;
+
 @end
 
 @implementation ViewController
 
+
+-(void) fillPreViewImageArray{
+    self.previewImagesArray = [[NSMutableArray alloc]init];
+    for (int i = 0; i< self.templateData.tmplData.count ;i++ ) {
+        UIImage *image = [[UIImage alloc]init];
+        [self.previewImagesArray addObject:image];
+    }
+}
 
 // 刷新界面
 -(void)setState {
@@ -234,7 +248,7 @@
         self.templateData = [self addPhotoIdToPhotos];
         
         NSLog(@"%@",self.templateData.prodSn);
-        [self.summaryTableView reloadData];
+        
         self.workSpaceFrame = self.workSpaceView.frame;
         
         if (self.templateData.tmplData.count > 0) {
@@ -244,7 +258,11 @@
             self.selectPaperIndex = 0;
             [self calculateRatio];
             [self setState];
+            [self fillPreViewImageArray];
         }
+        
+        [self.summaryTableView reloadData];
+        
     
     } failure:^(NSError *error) {
         //
@@ -273,16 +291,25 @@
     cell.button.titleLabel.font = [UIFont systemFontOfSize:15.0f];
     
     [cell.button setTitle:@"" forState:UIControlStateNormal];
+    
+    cell.previewImageView.image = nil;
+    UIImage *previewImage = self.previewImagesArray[indexPath.row];
+    if (previewImage) {
+        cell.previewImageView.image = previewImage;
+    }
+    
     if (paper.page.count  == 1) {
         Page *page = paper.page.firstObject;
         NSString *text = FORMAT(@"%@",page.text);
-        [cell.button setTitle:text forState:UIControlStateNormal];
+        //[cell.button setTitle:text forState:UIControlStateNormal];
+        cell.lbPageNumber.text = text;
     }
     else if (paper.page.count  == 2){
         Page *fpage = paper.page.firstObject;
         Page *lpage = paper.page.lastObject;
         NSString *text = FORMAT(@"%@-%@",fpage.text,lpage.text);
-        [cell.button setTitle:text forState:UIControlStateNormal];
+        //[cell.button setTitle:text forState:UIControlStateNormal];
+        cell.lbPageNumber.text = text;
     }
     
     // 大纲点击切换
@@ -295,18 +322,39 @@
         self.selectPaperIndex = indexPath.row;
         [self calculateRatio];
         [self setState];
+        [self createPreviewImage:self.selectPaperIndex];
     };
     return cell;
 }
 
 - (void)setupNavBarButtons {
-    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(0, 0, 40, 20);
-    [moreButton setTitle:@"相册" forState:UIControlStateNormal];
-    moreButton.backgroundColor = [UIColor clearColor];
-    [moreButton addTarget:self action:@selector(onEnterAlbum) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *msgItemBtn = [[UIBarButtonItem alloc] initWithCustomView:moreButton];
-    [self.navigationItem setRightBarButtonItem:msgItemBtn];
+    UIButton *albulmButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    albulmButton.frame = CGRectMake(0, 0, 40, 20);
+    [albulmButton setTitle:@"相册" forState:UIControlStateNormal];
+    albulmButton.backgroundColor = [UIColor clearColor];
+    [albulmButton addTarget:self action:@selector(onEnterAlbum) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *albulmButtonItem = [[UIBarButtonItem alloc] initWithCustomView:albulmButton];
+    
+    UIButton *saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    saveButton.frame = CGRectMake(0, 0, 40, 20);
+    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+    saveButton.backgroundColor = [UIColor clearColor];
+    [saveButton addTarget:self action:@selector(onSaveAlbum) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *saveButtonItem = [[UIBarButtonItem alloc] initWithCustomView:saveButton];
+    
+    
+    
+    [self.navigationItem setRightBarButtonItems:@[albulmButtonItem,saveButtonItem]];
+}
+
+
+-(void)onSaveAlbum {
+    UIImage *image = [self.cavas convertToImage];
+    self.previewImageView.image = image;
+}
+
+-(void)buildUpPreViewImage {
+    
 }
 
 -(void)onEnterAlbum {
@@ -396,10 +444,21 @@
     [self writePhotosWithId:self.selectPhotoId editPhoto:photo];
     
     [self setState];
-    [cropViewController dismissViewControllerAnimated:YES completion:nil];
+    
+    WEAK(self)
+    [cropViewController dismissViewControllerAnimated:YES completion:^{
+        STRONG(self)
+        [self createPreviewImage:self.selectPaperIndex];
+    }];
 }
 
 
+-(void)createPreviewImage:(NSInteger)index {
+    UIImage *image = self.previewImagesArray[index];
+    image = [self.cavas convertToImage];
+    self.previewImagesArray[index] = image;
+    [self.summaryTableView reloadData];
+}
 
 
 -(TemplateData*)sortTemplateData {
@@ -472,4 +531,5 @@
         }
     }
 }
+
 @end
