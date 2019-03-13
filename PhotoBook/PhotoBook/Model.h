@@ -228,3 +228,7 @@
 @property (nonatomic, copy)   PreviewData *data;
 @end
 
+
+@interface Papers : AtomObject
+@property (nonatomic, copy)  NSArray <Paper*> *papers;
+@end

@@ -89,3 +89,9 @@
 
 @end
 
+@implementation Papers
++ (NSDictionary *)bridgeClassAndArray {
+    return @{@"papers":@"Paper"};
+}
+@end
+

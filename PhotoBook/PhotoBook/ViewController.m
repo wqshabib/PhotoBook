@@ -15,6 +15,8 @@
 #import "TOCropViewController.h"
 #import "UIView+Category.h"
 #import "ProgressWidget.h"
+#import "NSDictionary+Category.h"
+#import "NSArray+Category.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -23,6 +25,8 @@
 #define kProdSn @"20190222153837-3-4-13206737285c6fa6fdb03b32.42716265"
 
 #define URL_UploadPreview @"http://diy.h5.keepii.com/index.php?m=upload&a=prodPreview"
+
+#define URL_Save @"http://diy.h5.keepii.com/index.php?m=diy&a=save"
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
 
@@ -632,6 +636,8 @@
             GCD_AFTER(0.5, ^{
                 [self.progressWidget hide];
                 [self.progressWidget progress:0];
+                
+                [self postSavewToServer];
             });
             
         });
@@ -639,4 +645,38 @@
     
 }
 
+
+
+
+-(void)postSavewToServer {
+//    Papers *papers = [[Papers alloc]init];
+//    papers.papers = [[NSArray alloc]init];
+    
+    NSMutableArray *array = [[NSMutableArray alloc]init];
+    for (TmplData *sigleData in self.templateData.tmplData) {
+        Paper *paper = sigleData.paper;
+        [array addObject:paper];
+    }
+//    papers.papers = (NSArray*)array;
+    
+    NSDictionary *map = [self.templateData toDict];
+    NSArray *mapPapers = map[@"tmplData"];
+    NSString *prodData = [mapPapers transToJSONString];
+    
+    WEAK(self)
+    [YLHttpTool POST:URL_Save params:@{@"prodSn":self.templateData.prodSn,
+                                       @"prodData":prodData,
+                                       } success:^(NSDictionary *JSON) {
+        STRONG(self)
+        Response *resp = (Response*)[Response toModel:JSON];
+        if(resp.status == 0)
+        {
+            NSLog(@"成功");
+        }
+    } failure:^(NSError *error) {
+        //
+    }];
+    
+    
+}
 @end
