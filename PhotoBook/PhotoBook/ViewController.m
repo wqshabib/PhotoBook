@@ -17,6 +17,7 @@
 #import "ProgressWidget.h"
 #import "NSDictionary+Category.h"
 #import "NSArray+Category.h"
+#import "ToolCell.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -30,7 +31,9 @@
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
 
-@interface ViewController ()<UITableViewDelegate,UITableViewDataSource,TOCropViewControllerDelegate>
+@interface ViewController ()<UITableViewDelegate,UITableViewDataSource,
+                            UICollectionViewDelegate,UICollectionViewDataSource,
+                            TOCropViewControllerDelegate>
 
 // 本地数据源
 @property (nonatomic,strong) TemplateData *templateData;
@@ -57,13 +60,11 @@
 // PhotoId
 @property (nonatomic,assign) NSInteger selectPhotoId;
 
-@property (weak, nonatomic) IBOutlet UIImageView *previewImageView;
-
-
 @property (strong, nonatomic) NSMutableArray<UIImage*> *previewImagesArray;
 
-
 @property (nonatomic,strong) ProgressWidget *progressWidget;
+
+@property (weak, nonatomic) IBOutlet UICollectionView *toolCollectionView;
 
 
 @end
@@ -99,6 +100,9 @@
 -(void)addCanvas {
     
     [[self.workSpaceView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    self.workSpaceView.backgroundColor  = [UIColor clearColor];
+
+    
     Paper *paper = self.selectPaper;
     double pw = [paper.width doubleValue];
     double ph = [paper.height doubleValue];
@@ -161,7 +165,8 @@
         Page *page = paper.page[i];
         CGRect pageRect = CGRectMake(perWidth*i,0, perWidth,perHeight);
         UIView *tmpView = [[UIView alloc]initWithFrame:pageRect];
-
+        tmpView.backgroundColor = [UIColor clearColor];
+        
         [self.cavasPages addObject:tmpView];
         [self.cavas addSubview:tmpView];
         
@@ -177,6 +182,7 @@
             CGRect miniRealRectFrame = [self toMiniRect:[self getRealPhotoOffSetRawRect:photo] ratio:self.ratio];
             
             PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
+            chip.backgroundColor = [UIColor clearColor];
             [tmpView addSubview:chip];
             
             if (photo.originalImage != nil) {
@@ -239,6 +245,9 @@
     
     self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
     [self.view addSubview:self.progressWidget];
+    
+    self.toolCollectionView.delegate = self;
+    self.toolCollectionView.dataSource = self;
     
 }
 
@@ -645,9 +654,6 @@
     
 }
 
-
-
-
 -(void)postSavewToServer {
 //    Papers *papers = [[Papers alloc]init];
 //    papers.papers = [[NSArray alloc]init];
@@ -676,7 +682,38 @@
     } failure:^(NSError *error) {
         //
     }];
-    
-    
 }
+
+
+-(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return 5;
+}
+
+- (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    ToolCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ToolCell" forIndexPath:indexPath];
+    NSInteger item = indexPath.item;
+    
+    if (item == 0) {
+        cell.iconMenu.image = IMAGE(@"tool_z.png");
+        cell.lbMenuName.text = @"撤销";
+    }
+    else if (item == 1) {
+        cell.iconMenu.image = IMAGE(@"tool_rz.png");
+        cell.lbMenuName.text = @"恢复";
+    }
+    else if (item == 2) {
+        cell.iconMenu.image = IMAGE(@"tool_move.png");
+        cell.lbMenuName.text = @"移动";
+    }
+    else if (item == 3) {
+        cell.iconMenu.image = IMAGE(@"tool_photo.png");
+        cell.lbMenuName.text = @"相册";
+    }
+    else if (item == 4) {
+        cell.iconMenu.image = IMAGE(@"tool_save.png");
+        cell.lbMenuName.text = @"保存";
+    }
+    return cell;
+}
+
 @end

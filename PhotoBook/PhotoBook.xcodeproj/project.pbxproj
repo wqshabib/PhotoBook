@@ -12,6 +12,7 @@
 		20118B002237A10A0071635A /* HWProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AFB2237A10A0071635A /* HWProgressView.m */; };
 		20118B012237A10A0071635A /* HWInstallView.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118AFD2237A10A0071635A /* HWInstallView.m */; };
 		20118B042237A1C20071635A /* ProgressWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = 20118B032237A1C20071635A /* ProgressWidget.m */; };
+		2015A3B0223B6F7A00219DED /* ToolCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2015A3AF223B6F7A00219DED /* ToolCell.m */; };
 		2016A911221FD1CB00CD08A0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2016A910221FD1CB00CD08A0 /* AppDelegate.m */; };
 		2016A914221FD1CB00CD08A0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2016A913221FD1CB00CD08A0 /* ViewController.m */; };
 		2016A917221FD1CB00CD08A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2016A915221FD1CB00CD08A0 /* Main.storyboard */; };
@@ -53,6 +54,8 @@
 		20118AFD2237A10A0071635A /* HWInstallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWInstallView.m; sourceTree = "<group>"; };
 		20118B022237A1C20071635A /* ProgressWidget.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProgressWidget.h; sourceTree = "<group>"; };
 		20118B032237A1C20071635A /* ProgressWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProgressWidget.m; sourceTree = "<group>"; };
+		2015A3AE223B6F7A00219DED /* ToolCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToolCell.h; sourceTree = "<group>"; };
+		2015A3AF223B6F7A00219DED /* ToolCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ToolCell.m; sourceTree = "<group>"; };
 		2016A90C221FD1CB00CD08A0 /* PhotoBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2016A90F221FD1CB00CD08A0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2016A910221FD1CB00CD08A0 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -205,6 +208,8 @@
 				2073D02422250E4700E70859 /* ManagerPhotoViewController.m */,
 				20118B022237A1C20071635A /* ProgressWidget.h */,
 				20118B032237A1C20071635A /* ProgressWidget.m */,
+				2015A3AE223B6F7A00219DED /* ToolCell.h */,
+				2015A3AF223B6F7A00219DED /* ToolCell.m */,
 			);
 			path = PhotoBook;
 			sourceTree = "<group>";
@@ -508,6 +513,7 @@
 				202E69C72227D36900C52996 /* LXCollectionViewLeftOrRightAlignedLayout.m in Sources */,
 				2049314C2232676F007CA3EC /* TOCropScrollView.m in Sources */,
 				204931482232676F007CA3EC /* TOActivityCroppedImageProvider.m in Sources */,
+				2015A3B0223B6F7A00219DED /* ToolCell.m in Sources */,
 				2073D02522250E4700E70859 /* ManagerPhotoViewController.m in Sources */,
 				20118AFF2237A10A0071635A /* HWCircleView.m in Sources */,
 				2049314E2232676F007CA3EC /* TOCropOverlayView.m in Sources */,
