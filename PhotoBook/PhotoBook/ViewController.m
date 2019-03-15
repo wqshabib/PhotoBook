@@ -387,18 +387,12 @@
     if (self.managerPhotoVC == nil) {
         UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         self.managerPhotoVC =  [story instantiateViewControllerWithIdentifier:@"ManagerPhotoViewController"];
-        self.managerPhotoVC.isPick = isPick;
-        [self.navigationController pushViewController:self.managerPhotoVC animated:YES];
-        [self handleChooseOnePhotoImage:photoId];
     }
-    else {
-        self.managerPhotoVC.isPick = isPick;
-        [self.navigationController pushViewController:self.managerPhotoVC animated:YES];
-        [self handleChooseOnePhotoImage:photoId];
-    }
-  
+    self.managerPhotoVC.isPick = isPick;
+    [self.navigationController pushViewController:self.managerPhotoVC animated:YES];
+    [self handleChooseOnePhotoImage:photoId];
+    [self handleAutoFill];
 }
-
 
 
 -(CGRect)caculateRect:(Photos*)photo image:(UIImage*)photoImage{
@@ -443,7 +437,6 @@
         Photos * photo = [self findPhotoWithPhotoId:photoId];
         photo = [self decoratePhotosWithCellData:photo celldata:celldata];
         [self writePhotosWithId:photoId editPhoto:photo];
-        
         CGRect defaultCropRect =[self caculateRect:photo image:celldata.image];
         TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:TOCropViewCroppingStyleDefault image:celldata.image];
         cropController.delegate = self;
@@ -455,6 +448,18 @@
         cropController.customAspectRatio = CGSizeMake(defaultCropRect.size.width, defaultCropRect.size.height);
         [self presentViewController:cropController animated:YES completion:nil];
     };
+}
+
+
+-(void)handleAutoFill {
+    WEAK(self)
+    self.managerPhotoVC.autoFill = ^(NSMutableArray<PhotoCellData *> * _Nonnull cellDatas) {
+        STRONG(self)
+        for (PhotoCellData * data in cellDatas) {
+            
+        }
+    };
+    
 }
 
 

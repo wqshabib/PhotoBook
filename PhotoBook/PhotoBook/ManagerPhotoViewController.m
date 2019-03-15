@@ -15,10 +15,11 @@
 #import "Model.h"
 #import "ProgressWidget.h"
 #import "ToolCell.h"
+#import "FCAlertView.h"
 
 #define UPLOAD_PHOTO @"http://diy.h5.keepii.com/index.php?m=upload&a=photo"
 
-@interface ManagerPhotoViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
+@interface ManagerPhotoViewController ()<UICollectionViewDelegate,UICollectionViewDataSource,FCAlertViewDelegate>
 
 
 // 相册
@@ -35,13 +36,9 @@
 
 @property (assign, nonatomic)  BOOL isInEdit;
 
-@property (strong, nonatomic) UIButton *editButton;
-@property (strong, nonatomic) UIButton *fillButton;
-@property (strong, nonatomic) UIButton *hideButton;
-
 // Gridview数据类型
 @property (strong, nonatomic) NSMutableArray<PhotoCellData*> *photos;
-@property (nonatomic,strong) NSMutableArray *selectFlagArray;
+@property (nonatomic,strong)  NSMutableArray *selectFlagArray;
 
 @property (nonatomic,strong) ProgressWidget *progressWidget;
 @end
@@ -49,17 +46,12 @@
 @implementation ManagerPhotoViewController
 
 -(void)viewWillAppear:(BOOL)animated {
-    
     self.isInEdit = NO;
     [self syncAndSetSelectedAllNo];
-    
     self.addView.alpha = 1;
     self.deleteView.alpha = 0;
-    
-    if (self.editButton) {
-        [self.editButton setTitle:@"选择" forState:UIControlStateNormal];
-    }
-    
+    [self.menuCollectionView reloadData];
+    [self.photoCollectionView reloadData];
     [super viewWillAppear:animated];
 }
 
@@ -267,8 +259,14 @@
         ToolCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ToolCell" forIndexPath:indexPath];
         NSInteger item = indexPath.item;
         if (item == 0) {
-            cell.iconMenu.image = IMAGE(@"tool_delete.png");
-            cell.lbMenuName.text = @"删除";
+            if (!self.isInEdit) {
+                cell.iconMenu.image = IMAGE(@"tool_delete.png");
+                cell.lbMenuName.text = @"删除";
+            }
+            else {
+                cell.iconMenu.image = IMAGE(@"tool_done.png");
+                cell.lbMenuName.text = @"完成";
+            }
             WEAK(self)
             cell.buton.onPress = ^(YLButton *button) {
                 STRONG(self)
@@ -338,54 +336,9 @@
     return 0;
 }
 
--(void)toolShowAndHide {
-    
-    
-}
-
+// 删除和完成
 -(void)toolDelete {
-    
-}
-
--(void)toolFill {
-    
-}
-
-
-- (void)setupNavBarButtons {
-    UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    editButton.frame = CGRectMake(0, 0, 40, 20);
-    [editButton setTitle:@"选择" forState:UIControlStateNormal];
-    editButton.backgroundColor = [UIColor clearColor];
-    [editButton addTarget:self action:@selector(onPressEdit:) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIButton *fillButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    fillButton.frame = CGRectMake(0, 0, 40, 20);
-    [fillButton setTitle:@"填充" forState:UIControlStateNormal];
-    fillButton.backgroundColor = [UIColor clearColor];
-    [fillButton addTarget:self action:@selector(onPressFill:) forControlEvents:UIControlEventTouchUpInside];
-    
-    
-    UIBarButtonItem *editButtonItem = [[UIBarButtonItem alloc] initWithCustomView:editButton];
-    UIBarButtonItem *fillButtonItem = [[UIBarButtonItem alloc] initWithCustomView:fillButton];
-    
-    [self.navigationItem setRightBarButtonItems:@[editButtonItem,fillButtonItem]];
-    
-    self.editButton = editButton;
-}
-
--(void)onPressFill:(UIButton*)button {
-    NSLog(@"Fill");
-}
-
-
-
-
-
-
--(void)onPressEdit:(UIButton*)button {
     self.isInEdit = !self.isInEdit;
-    [button setTitle:self.isInEdit ? @"完成" :@"选择" forState:UIControlStateNormal];
     [self.photoCollectionView reloadData];
     // 编辑状态
     if (self.isInEdit) {
@@ -408,7 +361,20 @@
             [self.view layoutIfNeeded];
         }];
     }
+    [self.menuCollectionView reloadData];
 }
+
+
+-(void)toolShowAndHide {
+ 
+}
+
+
+
+-(void)toolFill {
+    [self alertFill];
+}
+
 
 
 - (void)setupBackButtonWithBlock:(void(^)(void))backBlock {
@@ -427,7 +393,55 @@
 
 
 
+- (void) FCAlertView:(FCAlertView *)alertView clickedButtonIndex:(NSInteger)index buttonTitle:(NSString *)title {
+    if ([title isEqualToString:@"确定"]) {
+    }
+    else if ([title isEqualToString:@"再等等"]) {
+        
+    }
+}
 
+- (void)FCAlertDoneButtonClicked:(FCAlertView *)alertView {
+    if (alertView.tag == 4000) {
+        [self actionFill];
+    }
+    if (alertView.tag == 5000) {
+        [self callApiSelectPhoto];
+    }
+}
+
+-(void)alertFill {
+    
+    if (self.photos.count == 0) {
+        FCAlertView *alert = [[FCAlertView alloc] init];
+        alert.delegate = self;
+        alert.tag = 5000;
+        [alert makeAlertTypeCaution];
+        [alert showAlertInView:self
+                     withTitle:@"提示"
+                  withSubtitle:@"相册里一张相片都没有～ 去选出您喜欢的相片吧! "
+               withCustomImage:nil
+           withDoneButtonTitle:@"去选相片"
+                    andButtons:@[@"再等等"]];
+        return;
+    }
+    
+    FCAlertView *alert = [[FCAlertView alloc] init];
+    alert.delegate = self;
+    alert.tag = 4000;
+    [alert makeAlertTypeCaution];
+    [alert showAlertInView:self
+                 withTitle:@"提示"
+              withSubtitle:@"是否确定使用自动填充 ? "
+           withCustomImage:nil
+       withDoneButtonTitle:@"确定"
+                andButtons:@[@"再等等"]];
+}
+
+
+-(void)actionFill {
+    BLOCK_EXEC(self.autoFill,self.photos);
+}
 
 
 @end
