@@ -644,7 +644,6 @@
             GCD_AFTER(0.5, ^{
                 [self.progressWidget hide];
                 [self.progressWidget progress:0];
-                
                 [self postSavewToServer];
             });
             
@@ -674,12 +673,14 @@
                                        } success:^(NSDictionary *JSON) {
         STRONG(self)
         Response *resp = (Response*)[Response toModel:JSON];
-        if(resp.status == 0)
-        {
-            NSLog(@"成功");
+        if(resp.status == 0) {
+            [self showSaveSuccess];
+        }
+        else {
+            [self showError];
         }
     } failure:^(NSError *error) {
-        //
+         [self showError];
     }];
 }
 
@@ -812,13 +813,14 @@
 -(void)save {
     FCAlertView *alert = [[FCAlertView alloc] init];
     alert.delegate = self;
+    alert.tag = 1000;
     [alert makeAlertTypeCaution];
     [alert showAlertInView:self
                  withTitle:@"提示"
               withSubtitle:@"主人～ 您的作品已完成,保存并上传作品 ? "
            withCustomImage:nil
        withDoneButtonTitle:@"确定上传"
-                andButtons:@[@"再等等"]]; // Set your button titles here
+                andButtons:@[@"再等等"]];
     
     
 }
@@ -827,9 +829,49 @@
     if ([title isEqualToString:@"确定上传"]) {
         [self postUploadPreViewPhoto:self.previewImagesArray];
     }
-    if ([title isEqualToString:@"再等等"]) {
+    else if ([title isEqualToString:@"再等等"]) {
         // Perform Action for Button 2
     }
+    else if ([title isEqualToString:@"重试"]) {
+        [self postUploadPreViewPhoto:self.previewImagesArray];
+    }
+}
+
+- (void)FCAlertDoneButtonClicked:(FCAlertView *)alertView {
+    // 首次上传
+    if (alertView.tag == 1000) {
+        [self postUploadPreViewPhoto:self.previewImagesArray];
+    }
+    // 重试
+    else if (alertView.tag == 3000) {
+        [self postUploadPreViewPhoto:self.previewImagesArray];
+    }
+}
+
+-(void)showSaveSuccess {
+    FCAlertView *alert = [[FCAlertView alloc] init];
+    alert.delegate = self;
+    alert.tag = 2000;
+    [alert makeAlertTypeSuccess];
+    [alert showAlertInView:self
+                 withTitle:@"恭喜"
+              withSubtitle:@"作品保存成功!"
+           withCustomImage:nil
+       withDoneButtonTitle:@"朕知道了"
+                andButtons:nil];
+}
+
+-(void)showError {
+    FCAlertView *alert = [[FCAlertView alloc] init];
+    alert.delegate = self;
+    alert.tag = 3000;
+    [alert makeAlertTypeWarning];
+    [alert showAlertInView:self
+                 withTitle:@"很抱歉"
+              withSubtitle:@"服务器刚刚开小差了,再上传一次 ? "
+           withCustomImage:nil
+       withDoneButtonTitle:@"重试"
+                andButtons:@[@"取消"]];
 }
 
 @end
