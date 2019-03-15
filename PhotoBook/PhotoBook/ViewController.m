@@ -18,6 +18,7 @@
 #import "NSDictionary+Category.h"
 #import "NSArray+Category.h"
 #import "ToolCell.h"
+#import "FCAlertView.h"
 
 #define URL_INIT @"http://diy.h5.keepii.com/index.php?m=diy&a=init"
 
@@ -33,7 +34,7 @@
 
 @interface ViewController ()<UITableViewDelegate,UITableViewDataSource,
                             UICollectionViewDelegate,UICollectionViewDataSource,
-                            TOCropViewControllerDelegate>
+                            TOCropViewControllerDelegate,FCAlertViewDelegate>
 
 // 本地数据源
 @property (nonatomic,strong) TemplateData *templateData;
@@ -809,7 +810,26 @@
 }
 
 -(void)save {
-    [self postUploadPreViewPhoto:self.previewImagesArray];
+    FCAlertView *alert = [[FCAlertView alloc] init];
+    alert.delegate = self;
+    [alert makeAlertTypeCaution];
+    [alert showAlertInView:self
+                 withTitle:@"提示"
+              withSubtitle:@"主人～ 您的作品已完成,保存并上传作品 ? "
+           withCustomImage:nil
+       withDoneButtonTitle:@"确定上传"
+                andButtons:@[@"再等等"]]; // Set your button titles here
+    
+    
+}
+
+- (void) FCAlertView:(FCAlertView *)alertView clickedButtonIndex:(NSInteger)index buttonTitle:(NSString *)title {
+    if ([title isEqualToString:@"确定上传"]) {
+        [self postUploadPreViewPhoto:self.previewImagesArray];
+    }
+    if ([title isEqualToString:@"再等等"]) {
+        // Perform Action for Button 2
+    }
 }
 
 @end
