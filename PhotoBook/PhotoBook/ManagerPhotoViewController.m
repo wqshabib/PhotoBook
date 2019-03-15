@@ -14,17 +14,20 @@
 #import "YLAlertView.h"
 #import "Model.h"
 #import "ProgressWidget.h"
+#import "ToolCell.h"
 
 #define UPLOAD_PHOTO @"http://diy.h5.keepii.com/index.php?m=upload&a=photo"
 
-
-
 @interface ManagerPhotoViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
+
+
+// 相册
+@property (weak, nonatomic) IBOutlet UICollectionView *photoCollectionView;
+// 功能
+@property (weak, nonatomic) IBOutlet UICollectionView *menuCollectionView;
 
 @property (weak, nonatomic) IBOutlet YLButton *buttonAddPhoto;
 @property (weak, nonatomic) IBOutlet YLButton *buttonDeletePhoto;
-@property (weak, nonatomic) IBOutlet UICollectionView *photoCollectionView;
-@property (weak, nonatomic) IBOutlet LXCollectionViewLeftOrRightAlignedLayout *layout;
 
 
 @property (weak, nonatomic) IBOutlet UIView *deleteView;
@@ -82,7 +85,8 @@
     self.photos = [[NSMutableArray alloc]init];
     self.photoCollectionView.delegate = self;
     self.photoCollectionView.dataSource = self;
-    
+    self.menuCollectionView.delegate = self;
+    self.menuCollectionView.dataSource = self;
     
     
     self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
@@ -109,7 +113,7 @@
             [self deleteIndexOfPhotos];
         }];
     };
-    [self setupNavBarButtons];
+//    [self setupNavBarButtons];
     [self setupBackButtonWithBlock:nil];
 }
 
@@ -164,17 +168,16 @@
     [ac showPreviewAnimated:YES];
 }
 
+
+
+// 批量上传图片
 -(void)postUploadPhoto:(NSArray<UIImage *>*)images {
-    
-    
     __block CGFloat step  = 0.9 /  images.count;
-    
     NSString *msg = FORMAT(@"正在上传  1 / %d 张相片",(int)images.count);
     [self.progressWidget show];
     [self.progressWidget progress:0];
     [self.progressWidget progress:0.1];
     [self.progressWidget title:msg];
-    
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
@@ -184,7 +187,6 @@
             PhotoCellData *p = [[PhotoCellData alloc]init];
             p.image = images[i];
             p.taskId = i;
-            
             NSString *msg = FORMAT(@"正在上传  %d / %d 张相片",i+1,(int)images.count);
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.progressWidget title:msg];
@@ -234,39 +236,120 @@
 
         });
     });
- 
 }
 
 
 
 - (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
-    PhotoCellData *celldata = self.photos[indexPath.row];
-    PhotoCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"PhotoCell" forIndexPath:indexPath];
-    cell.photoImageView.image = celldata.image;
-    cell.isEdit = self.isInEdit;
-    BOOL isSelected = [self.selectFlagArray[indexPath.row] boolValue];
-    cell.isHaveSelected = isSelected;
-    WEAK(self)
-    cell.button.onPress = ^(YLButton *button) {
-        STRONG(self)
-        if (self.isPick == YES) {
-            BLOCK_EXEC(self.chooseOnePhotoImage,celldata);
-//            BLOCK_EXEC(self.chooseOnePhoto,PhotoCellData);
-            [self.navigationController popViewControllerAnimated:YES];
-            return;
+    if ([collectionView isEqual:self.photoCollectionView]) {
+        PhotoCellData *celldata = self.photos[indexPath.row];
+        PhotoCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"PhotoCell" forIndexPath:indexPath];
+        cell.photoImageView.image = celldata.image;
+        cell.isEdit = self.isInEdit;
+        BOOL isSelected = [self.selectFlagArray[indexPath.row] boolValue];
+        cell.isHaveSelected = isSelected;
+        WEAK(self)
+        cell.button.onPress = ^(YLButton *button) {
+            STRONG(self)
+            if (self.isPick == YES) {
+                BLOCK_EXEC(self.chooseOnePhotoImage,celldata);
+                [self.navigationController popViewControllerAnimated:YES];
+                return;
+            }
+            
+            BOOL isSelectedButton = [self.selectFlagArray[indexPath.row] boolValue];
+            self.selectFlagArray[indexPath.row] = [NSNumber numberWithBool:!isSelectedButton];
+            [self.photoCollectionView reloadData];
+        };
+        return cell;
+    }
+    else if ([collectionView isEqual:self.menuCollectionView]) {
+        ToolCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ToolCell" forIndexPath:indexPath];
+        NSInteger item = indexPath.item;
+        if (item == 0) {
+            cell.iconMenu.image = IMAGE(@"tool_delete.png");
+            cell.lbMenuName.text = @"删除";
+            WEAK(self)
+            cell.buton.onPress = ^(YLButton *button) {
+                STRONG(self)
+                
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+                } completion:^(BOOL ok){
+                    [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        cell.backView.transform = CGAffineTransformIdentity;
+                    } completion:^(BOOL finished){
+                        [self toolDelete];
+                    }];
+                }];
+                
+            };
         }
-        
-        BOOL isSelectedButton = [self.selectFlagArray[indexPath.row] boolValue];
-        self.selectFlagArray[indexPath.row] = [NSNumber numberWithBool:!isSelectedButton];
-        [self.photoCollectionView reloadData];
-    };
-    return cell;
+        else if (item == 1) {
+            cell.iconMenu.image = IMAGE(@"tool_fill.png");
+            cell.lbMenuName.text = @"填充";
+            WEAK(self)
+            cell.buton.onPress = ^(YLButton *button) {
+                STRONG(self)
+                
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+                } completion:^(BOOL ok){
+                    [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        cell.backView.transform = CGAffineTransformIdentity;
+                    } completion:^(BOOL finished){
+                        [self toolFill];
+                    }];
+                }];
+            };
+        }
+        else if (item == 2) {
+            cell.iconMenu.image = IMAGE(@"tool_hide.png");
+            cell.lbMenuName.text = @"隐藏";
+            WEAK(self)
+            cell.buton.onPress = ^(YLButton *button) {
+                STRONG(self)
+                
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+                } completion:^(BOOL ok){
+                    [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        cell.backView.transform = CGAffineTransformIdentity;
+                    } completion:^(BOOL finished){
+                        [self toolShowAndHide];
+                    }];
+                }];
+                
+            };
+        }
+        return cell;
+    }
+    return [[UICollectionViewCell alloc]init];
+    
 }
 
 - (NSInteger)collectionView:(nonnull UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.photos.count;
+    if ([collectionView isEqual:self.photoCollectionView]) {
+        return self.photos.count;
+    }
+    else if ([collectionView isEqual:self.menuCollectionView]) {
+        return 3;
+    }
+    return 0;
 }
 
+-(void)toolShowAndHide {
+    
+    
+}
+
+-(void)toolDelete {
+    
+}
+
+-(void)toolFill {
+    
+}
 
 
 - (void)setupNavBarButtons {
@@ -289,7 +372,6 @@
     [self.navigationItem setRightBarButtonItems:@[editButtonItem,fillButtonItem]];
     
     self.editButton = editButton;
-    
 }
 
 -(void)onPressFill:(UIButton*)button {

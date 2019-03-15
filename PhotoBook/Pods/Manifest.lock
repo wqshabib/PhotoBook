@@ -14,6 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.2.1)
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
+  - FCAlertView (1.4.0)
   - GPUImage (0.1.7)
   - SDWebImage (4.4.4):
     - SDWebImage/Core (= 4.4.4)
@@ -30,6 +31,7 @@ PODS:
     - SDWebImage
 
 DEPENDENCIES:
+  - FCAlertView
   - YLHttp
   - YLUIExt
   - ZLPhotoBrowser
@@ -37,6 +39,7 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - AFNetworking
+    - FCAlertView
     - GPUImage
     - SDWebImage
     - YLCore
@@ -46,6 +49,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  FCAlertView: fdddd63381898c1d1a5a20c9f084fbd2c6d12f8b
   GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
   SDWebImage: c00ec18ab25d10e5ffac109b0f78d1b4341c9691
   YLCore: cd9fbd6c395f8a4db76988e511eea3404bf4ce40
@@ -53,6 +57,6 @@ SPEC CHECKSUMS:
   YLUIExt: 177ccb1d67d717117ccc35329dd93f4ca311ce16
   ZLPhotoBrowser: ef9d5cdc9fdc8ce029fd0e41223e8eb8a642918f
 
-PODFILE CHECKSUM: d18266a15c6681b5da7381b09d18f1e61222e10d
+PODFILE CHECKSUM: 3b26aeea331ddd16e1346d3020279fd53f4fd2eb
 
 COCOAPODS: 1.5.0

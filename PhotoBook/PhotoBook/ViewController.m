@@ -358,22 +358,20 @@
     [albulmButton addTarget:self action:@selector(onEnterAlbum) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *albulmButtonItem = [[UIBarButtonItem alloc] initWithCustomView:albulmButton];
     
-    UIButton *saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    saveButton.frame = CGRectMake(0, 0, 40, 20);
-    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
-    saveButton.backgroundColor = [UIColor clearColor];
-    [saveButton addTarget:self action:@selector(onSaveAlbum) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *saveButtonItem = [[UIBarButtonItem alloc] initWithCustomView:saveButton];
-    
-    
-    
-    [self.navigationItem setRightBarButtonItems:@[albulmButtonItem,saveButtonItem]];
+//    UIButton *saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    saveButton.frame = CGRectMake(0, 0, 40, 20);
+//    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+//    saveButton.backgroundColor = [UIColor clearColor];
+//    [saveButton addTarget:self action:@selector(onSaveAlbum) forControlEvents:UIControlEventTouchUpInside];
+//    UIBarButtonItem *saveButtonItem = [[UIBarButtonItem alloc] initWithCustomView:saveButton];
+
+    [self.navigationItem setRightBarButtonItems:@[albulmButtonItem]];
 }
 
 
--(void)onSaveAlbum {
-    [self postUploadPreViewPhoto:self.previewImagesArray];
-}
+//-(void)onSaveAlbum {
+//    [self postUploadPreViewPhoto:self.previewImagesArray];
+//}
 
 -(void)buildUpPreViewImage {
     
@@ -696,24 +694,122 @@
     if (item == 0) {
         cell.iconMenu.image = IMAGE(@"tool_z.png");
         cell.lbMenuName.text = @"撤销";
+        WEAK(self)
+        cell.buton.onPress = ^(YLButton *button) {
+            STRONG(self)
+            
+            [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            } completion:^(BOOL ok){
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformIdentity;
+                } completion:^(BOOL finished){
+                    [self undo];
+                }];
+            }];
+            
+        };
     }
     else if (item == 1) {
         cell.iconMenu.image = IMAGE(@"tool_rz.png");
         cell.lbMenuName.text = @"恢复";
+        WEAK(self)
+        cell.buton.onPress = ^(YLButton *button) {
+            STRONG(self)
+            
+            [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            } completion:^(BOOL ok){
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformIdentity;
+                } completion:^(BOOL finished){
+                      [self redo];
+                }];
+            }];
+        };
     }
     else if (item == 2) {
         cell.iconMenu.image = IMAGE(@"tool_move.png");
         cell.lbMenuName.text = @"移动";
+        WEAK(self)
+        cell.buton.onPress = ^(YLButton *button) {
+            STRONG(self)
+            
+            [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            } completion:^(BOOL ok){
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformIdentity;
+                } completion:^(BOOL finished){
+                    [self move];
+                }];
+            }];
+            
+        };
     }
     else if (item == 3) {
         cell.iconMenu.image = IMAGE(@"tool_photo.png");
         cell.lbMenuName.text = @"相册";
+        WEAK(self)
+        cell.buton.onPress = ^(YLButton *button) {
+            STRONG(self)
+            
+            [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            } completion:^(BOOL ok){
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformIdentity;
+                } completion:^(BOOL finished){
+                    [self openPhoto];
+                }];
+            }];
+            
+        };
     }
     else if (item == 4) {
         cell.iconMenu.image = IMAGE(@"tool_save.png");
         cell.lbMenuName.text = @"保存";
+        WEAK(self)
+        cell.buton.onPress = ^(YLButton *button) {
+            STRONG(self)
+            
+            
+            [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            } completion:^(BOOL ok){
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformIdentity;
+                } completion:^(BOOL finished){
+                    [self save];
+                }];
+            }];
+            
+           
+        };
     }
     return cell;
+}
+
+
+-(void)undo {
+    
+    
+}
+
+-(void)redo {
+    
+}
+
+-(void)move {
+    
+}
+
+-(void)openPhoto {
+    [self pushToPhotoManager:NO photoId:0];
+}
+
+-(void)save {
+    [self postUploadPreViewPhoto:self.previewImagesArray];
 }
 
 @end

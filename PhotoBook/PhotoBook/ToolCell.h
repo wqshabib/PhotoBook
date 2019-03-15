@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "YLButton.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (weak, nonatomic) IBOutlet UIView *backView;
 @property (weak, nonatomic) IBOutlet UILabel *lbMenuName;
-@property (weak, nonatomic) IBOutlet UIButton *buton;
+@property (weak, nonatomic) IBOutlet YLButton *buton;
 @property (weak, nonatomic) IBOutlet UIImageView *iconMenu;
 
 @end
