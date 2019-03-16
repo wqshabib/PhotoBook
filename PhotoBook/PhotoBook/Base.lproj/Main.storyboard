@@ -278,6 +278,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="PhotoBook" id="sDV-MP-Udw"/>
                     <connections>
+                        <outlet property="editAreaView" destination="aeA-bx-LMF" id="xby-u2-ISM"/>
                         <outlet property="summaryTableView" destination="M1R-RB-dcD" id="zkR-UN-NS0"/>
                         <outlet property="toolCollectionView" destination="yYi-ax-dwB" id="mMw-IT-5VP"/>
                         <outlet property="workSpaceView" destination="7bQ-kg-fe9" id="ax8-Oq-z2p"/>
@@ -430,7 +431,7 @@
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <subviews>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rvy-dI-7wU">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="60"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                                     <subviews>
                                                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tool_photo" translatesAutoresizingMaskIntoConstraints="NO" id="ElZ-8w-5BK">
                                                                             <rect key="frame" x="35" y="8" width="30" height="30"/>
@@ -446,7 +447,7 @@
                                                                             <nil key="highlightedColor"/>
                                                                         </label>
                                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u6p-DD-lz9" customClass="YLButton">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="100" height="60"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                                         </button>
                                                                     </subviews>
                                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

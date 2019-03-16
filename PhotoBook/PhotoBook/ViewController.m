@@ -32,7 +32,15 @@
 
 // http://diy.h5.keepii.com/photobook/#/?prodSn=20190222153837-3-4-13206737285c6fa6fdb03b32.42716265
 
-@interface ViewController ()<UITableViewDelegate,UITableViewDataSource,
+@interface  CavasObject: NSObject
+
+@end
+
+@implementation CavasObject
+
+@end
+
+@interface ViewController ()<UITableViewDelegate,UITableViewDataSource,UIScrollViewDelegate,
                             UICollectionViewDelegate,UICollectionViewDataSource,
                             TOCropViewControllerDelegate,FCAlertViewDelegate>
 
@@ -40,22 +48,8 @@
 @property (nonatomic,strong) TemplateData *templateData;
 // 大纲列表
 @property (weak, nonatomic) IBOutlet YLTableView *summaryTableView;
-// 工作区
-@property (weak, nonatomic) IBOutlet UIView *workSpaceView;
-// 缩放比例 0 - 1
-@property (nonatomic,assign) double ratio;
-// 当前页
-@property (nonatomic,assign) NSInteger selectPaperIndex;
-// 当前页数据
-@property (nonatomic,strong) Paper *selectPaper;
-// 工作区宽度
-@property (nonatomic,assign) CGRect workSpaceFrame;
-// 画布宽
-@property (nonatomic,assign) CGRect cavasFrame;
-// 画布
-@property (strong, nonatomic) UIView *cavas;
-// 画布上的页
-@property (strong, nonatomic) NSMutableArray<UIView*> *cavasPages;
+
+
 // 相册控制器
 @property (nonatomic,strong) ManagerPhotoViewController *managerPhotoVC;
 // PhotoId
@@ -68,12 +62,150 @@
 @property (weak, nonatomic) IBOutlet UICollectionView *toolCollectionView;
 
 
+// 重构尝试
+@property (weak, nonatomic) IBOutlet UIView *editAreaView;
+// 滚动视图
+@property (nonatomic,strong) UIScrollView *scrollerView;
+
+
+// 工作Paper
+@property (nonatomic,strong) NSMutableArray<UIView*> *workSpaceViewArray;
+// 工作Cavans
+@property (nonatomic,strong) NSMutableArray<UIView*> *cavansArray;
+
+// 获取页面总数
+@property (nonatomic,assign) NSInteger paperCount;
+
+// 缩放比例 0 - 1 .服务端画布 / 设备上比例
+@property (nonatomic,assign) double paperToDeivceRatio;
+
+// 当前页
+@property (nonatomic,assign) NSInteger selectPaperIndex;
+
 @end
 
 @implementation ViewController
 
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    CGFloat x = scrollView.contentOffset.x;
+    int pageNum = x / self.editAreaView.bounds.size.width;
+    if (self.selectPaperIndex != pageNum) {
+        self.selectPaperIndex = pageNum;
+    }
+}
 
--(void) fillPreViewImageArray{
+-(void)setSelectPaperIndex:(NSInteger)selectPaperIndex {
+    CGRect editArea = self.editAreaView.bounds;
+    double w = editArea.size.width;
+    _selectPaperIndex = selectPaperIndex;
+    [self.scrollerView setContentOffset:CGPointMake(selectPaperIndex * w, 0) animated: YES];
+    [self.summaryTableView setContentOffset:CGPointMake(0, 100 * selectPaperIndex) animated:YES];
+}
+
+-(NSInteger)paperCount {
+    return self.templateData.tmplData.count;
+}
+
+-(double)paperToDeivceRatio {
+    if (self.templateData.tmplData.count == 0) {
+        return 1;
+    }
+    TmplData *tmpData  = self.templateData.tmplData.firstObject;
+    Paper *paper = tmpData.paper;
+    double pw = [paper.width doubleValue];
+    double workSpaceW = self.editAreaView.bounds.size.width;
+    return (workSpaceW / pw);
+}
+
+-(void)createPagesInScrollows {
+    CGRect editArea = self.editAreaView.bounds;
+    self.scrollerView = [[UIScrollView alloc]initWithFrame:editArea];
+    self.scrollerView.pagingEnabled = YES;
+    self.scrollerView.showsHorizontalScrollIndicator = NO;
+    self.scrollerView.showsVerticalScrollIndicator = NO;
+    self.scrollerView.delegate = self;
+    [self.editAreaView addSubview:self.scrollerView];
+    self.workSpaceViewArray = [[NSMutableArray alloc]init];
+    for (int i = 0; i < self.paperCount; i++) {
+        UIView *paperView  = [[UIView alloc]initWithFrame:CGRectMake(editArea.size.width * i, 0,
+                                                                     editArea.size.width, editArea.size.height)];
+        
+        paperView.backgroundColor = [UIColor clearColor];
+        [self.workSpaceViewArray addObject:paperView];
+        [self.scrollerView addSubview:paperView];
+    }
+    [self.scrollerView setContentSize:CGSizeMake(editArea.size.width *self.paperCount , editArea.size.height)];
+    [self createCavans];
+}
+
+
+-(void)createCavans {
+    
+    self.cavansArray = [[NSMutableArray alloc]init];
+    
+    for (int i = 0 ; i < self.paperCount ;i++) {
+        Paper *paper = self.templateData.tmplData[i].paper;
+        double deviceW = [paper.width doubleValue]  * self.paperToDeivceRatio;
+        double deviceH = [paper.height doubleValue] * self.paperToDeivceRatio;
+        
+        UIView *workSpaceView = self.workSpaceViewArray[i];
+        double workH = workSpaceView.bounds.size.height;
+        double y = (workH -  deviceH) / 2;
+        
+        CGRect cavasBounds = CGRectMake(0, y,deviceW,deviceH);
+        UIView *canvas = [[UIView alloc]initWithFrame:cavasBounds];
+        [workSpaceView addSubview:canvas];
+        canvas.backgroundColor = [UIColor clearColor];
+        [self.cavansArray addObject:canvas];
+        
+        
+        double pageWidth = cavasBounds.size.width /  paper.page.count;
+        
+        for (int k = 0; k < paper.page.count ; k++) {
+            Page *page = paper.page[k];
+            CGRect pageRect = CGRectMake(pageWidth*k,0, pageWidth,cavasBounds.size.height);
+            UIView *pageBack = [[UIView alloc]initWithFrame:pageRect];
+            pageBack.backgroundColor = [UIColor clearColor];
+            [canvas addSubview:pageBack];
+            
+            YLImageView *bgImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, pageRect.size.width, pageRect.size.height)];
+            bgImageView.imageUrl = page.data.bg.image;
+            [pageBack addSubview:bgImageView];
+            
+            Data *data = page.data;
+            for (int k = 0; k < data.photos.count ; k++) {
+                Photos *photo = data.photos[k];
+                
+                CGRect miniRectFrame = [self toMiniRect:[self getPhotoChipRawRect:photo] ratio:self.paperToDeivceRatio];
+                CGRect miniRealRectFrame = [self toMiniRect:[self getRealPhotoOffSetRawRect:photo] ratio:self.paperToDeivceRatio];
+                
+                PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
+                chip.backgroundColor = [UIColor clearColor];
+                [pageBack addSubview:chip];
+                
+                if (photo.originalImage != nil) {
+                    chip.photoImageView.image = [photo.originalImage imageByCropToRect:
+                                                 [self caculateRect:photo image:photo.originalImage]];
+                }
+                
+                [chip addBorderImage:photo.image];
+                [chip roate:photo.rotate];
+                chip.button.tag = photo.photoId;
+                
+                NSLog(@"photoId = %06td",photo.photoId);
+                
+                WEAK(self)
+                chip.button.onPress = ^(YLButton *button) {
+                    STRONG(self)
+                    self.selectPhotoId = button.tag;
+                    [self onPressSelectLoc:button];
+                };
+            }
+        }
+    }
+}
+
+-(void)initPreviews {
     self.previewImagesArray = [[NSMutableArray alloc]init];
     for (int i = 0; i< self.templateData.tmplData.count ;i++ ) {
         UIImage *image = [[UIImage alloc]init];
@@ -81,41 +213,16 @@
     }
 }
 
-// 刷新界面
--(void)setState {
-    [self addCanvas];
-    [self addElement];
-}
-
--(void)calculateRatio {
-    Paper *paper = self.selectPaper;
-    double pw = [paper.width doubleValue];
-    if (pw == 0) {
-        self.ratio = 1;
-        return;
+-(void)updateSummeryTable {
+    for (int i = 0; i < self.cavansArray.count; i++) {
+        UIView *cavas = self.cavansArray[i];
+        UIImage *image = self.previewImagesArray[i];
+        image = [cavas convertToImage];
+        self.previewImagesArray[i] = image;
     }
-    double workSpaceW = self.workSpaceFrame.size.width;
-    self.ratio = workSpaceW / pw;
+    [self.summaryTableView reloadData];
 }
 
--(void)addCanvas {
-    
-    [[self.workSpaceView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    self.workSpaceView.backgroundColor  = [UIColor clearColor];
-
-    
-    Paper *paper = self.selectPaper;
-    double pw = [paper.width doubleValue];
-    double ph = [paper.height doubleValue];
-    
-    CGRect cavasFrame = CGRectMake(0, 0, pw * self.ratio, ph * self.ratio);
-    UIView *canvas = [[UIView alloc]initWithFrame:cavasFrame];
-    [self.workSpaceView addSubview:canvas];
-    canvas.backgroundColor = [UIColor clearColor];
-    canvas.center = [self.workSpaceView convertPoint:self.workSpaceView.center fromView:self.workSpaceView];
-    self.cavasFrame = canvas.frame;
-    self.cavas = canvas;
-}
 
 -(CGRect)toMiniRect:(CGRect)rawRect ratio:(double)ratio{
     double rx = rawRect.origin.x;
@@ -155,59 +262,6 @@
 }
 
 
--(void)addElement {
-    CGRect cavasFrame = self.cavasFrame;
-    Paper *paper = self.selectPaper;
-    double perWidth = cavasFrame.size.width /  paper.page.count;
-    double perHeight = cavasFrame.size.height;
-    self.cavasPages = [[NSMutableArray alloc]init];
-    
-    for (int i = 0; i < paper.page.count ; i++) {
-        Page *page = paper.page[i];
-        CGRect pageRect = CGRectMake(perWidth*i,0, perWidth,perHeight);
-        UIView *tmpView = [[UIView alloc]initWithFrame:pageRect];
-        tmpView.backgroundColor = [UIColor clearColor];
-        
-        [self.cavasPages addObject:tmpView];
-        [self.cavas addSubview:tmpView];
-        
-        YLImageView *bgImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, pageRect.size.width, pageRect.size.height)];
-        bgImageView.imageUrl = page.data.bg.image;
-        [tmpView addSubview:bgImageView];
-        
-        Data *data = page.data;
-        for (int k = 0; k < data.photos.count ; k++) {
-            Photos *photo = data.photos[k];
-            
-            CGRect miniRectFrame = [self toMiniRect:[self getPhotoChipRawRect:photo] ratio:self.ratio];
-            CGRect miniRealRectFrame = [self toMiniRect:[self getRealPhotoOffSetRawRect:photo] ratio:self.ratio];
-            
-            PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
-            chip.backgroundColor = [UIColor clearColor];
-            [tmpView addSubview:chip];
-            
-            if (photo.originalImage != nil) {
-               chip.photoImageView.image = [photo.originalImage imageByCropToRect:
-                                            [self caculateRect:photo image:photo.originalImage]];
-            }
-            
-            [chip addBorderImage:photo.image];
-            [chip roate:photo.rotate];
-            chip.button.tag = photo.photoId;
-            
-            NSLog(@"photoId = %06td",photo.photoId);
-            
-            WEAK(self)
-            chip.button.onPress = ^(YLButton *button) {
-                STRONG(self)
-                self.selectPhotoId = button.tag;
-                [self onPressSelectLoc:button];
-            };
-            
-        }
-    }
-}
-
 -(void)onPressSelectLoc:(YLButton*)button{
     
     // button.backgroundColor = COLORA(102,187,106,0.8);
@@ -242,7 +296,6 @@
     [self setupNavBarButtons];
     [self initTable];
     [self requestInitData];
-//    [self requestGenerate];
     
     self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
     [self.view addSubview:self.progressWidget];
@@ -264,6 +317,7 @@
         STRONG(self)
         TemplateResponse *resp = (TemplateResponse*)[TemplateResponse toModel:JSON];
         if (resp.status != 0) {
+            // TODO ... Toast...
             return;
         }
         self.templateData = resp.data;
@@ -272,24 +326,16 @@
         // 打标签
         self.templateData = [self addPhotoIdToPhotos];
         
-        self.workSpaceFrame = self.workSpaceView.frame;
-        
         if (self.templateData.tmplData.count > 0) {
-            TmplData *data = self.templateData.tmplData[0];
-            Paper *paper = data.paper;
-            self.selectPaper = paper;
             self.selectPaperIndex = 0;
-            [self calculateRatio];
-            [self setState];
-            [self fillPreViewImageArray];
         }
-
         
-        [self.summaryTableView reloadData];
-        
+        [self createPagesInScrollows];
+        [self initPreviews];
+        [self updateSummeryTable];
     
     } failure:^(NSError *error) {
-        //
+        // TODO ..Toast...
     }];
 }
 
@@ -340,13 +386,9 @@
     WEAK(self)
     cell.button.onPress = ^(YLButton *button) {
         STRONG(self)
-        TmplData *data = self.templateData.tmplData[indexPath.row];
-        Paper *paper = data.paper;
-        self.selectPaper = paper;
         self.selectPaperIndex = indexPath.row;
-        [self calculateRatio];
-        [self setState];
-        [self createPreviewImage:self.selectPaperIndex];
+//        [self updateUI];
+//        [self createPreviewImage:self.selectPaperIndex];
     };
     return cell;
 }
@@ -467,8 +509,8 @@
             CGRect defaultCropRect =[self caculateRect:photo image:data.image];
             photo = [self decoratePhotosWithCropRect:photo cropRect:defaultCropRect angle:0];
         }
-        [self setState];
-        [self createPreviewImage:self.selectPaperIndex];
+        [self updateUI];
+        //[self createPreviewImage:self.selectPaperIndex];
         [self.summaryTableView reloadData];
     };
 }
@@ -500,21 +542,13 @@
     photo = [self decoratePhotosWithCropRect:photo cropRect:cropRect angle:angle];
     [self writePhotosWithId:self.selectPhotoId editPhoto:photo];
     
-    [self setState];
+    [self updateUI];
     
     WEAK(self)
     [cropViewController dismissViewControllerAnimated:YES completion:^{
         STRONG(self)
-        [self createPreviewImage:self.selectPaperIndex];
+        //[self createPreviewImage:self.selectPaperIndex];
     }];
-}
-
-
--(void)createPreviewImage:(NSInteger)index {
-    UIImage *image = self.previewImagesArray[index];
-    image = [self.cavas convertToImage];
-    self.previewImagesArray[index] = image;
-    [self.summaryTableView reloadData];
 }
 
 
@@ -904,5 +938,10 @@
         }
     }
     return (NSArray*)tmp;
+}
+
+
+-(void)updateUI {
+    
 }
 @end
