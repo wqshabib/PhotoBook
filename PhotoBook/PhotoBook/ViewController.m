@@ -203,6 +203,11 @@
     }
 }
 
+-(void)updateAllCavas {
+    for (int i = 0; i < self.cavansArray.count; i++) {
+        [self updateCavas:i];
+    }
+}
 -(void)updateCavas:(NSInteger)pageIndex {
     
     UIView *canvas = self.cavansArray[pageIndex];
@@ -544,11 +549,14 @@
             PhotoCellData *data = cellDatas[i];
             NSInteger photoId = [idArrays[i] intValue];
             Photos * photo = [self findPhotoWithPhotoId:photoId];
+            photo.originalImage = data.image;
             photo = [self decoratePhotosWithCellData:photo celldata:data];
             CGRect defaultCropRect =[self caculateRect:photo image:data.image];
             photo = [self decoratePhotosWithCropRect:photo cropRect:defaultCropRect angle:0];
         }
-        [self.summaryTableView reloadData];
+        [self updateAllCavas];
+        [self updateSummeryTable];
+        [self.navigationController popViewControllerAnimated:YES];
     };
 }
 
