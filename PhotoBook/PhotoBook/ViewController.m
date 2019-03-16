@@ -192,8 +192,6 @@
                 [chip roate:photo.rotate];
                 chip.button.tag = photo.photoId;
                 
-                NSLog(@"photoId = %06td",photo.photoId);
-                
                 WEAK(self)
                 chip.button.onPress = ^(YLButton *button) {
                     STRONG(self)
@@ -203,6 +201,65 @@
             }
         }
     }
+}
+
+-(void)updateCavas:(NSInteger)pageIndex {
+    
+    UIView *canvas = self.cavansArray[pageIndex];
+    [canvas.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    Paper *paper = self.templateData.tmplData[pageIndex].paper;
+    
+    double deviceW = [paper.width doubleValue]  * self.paperToDeivceRatio;
+    double deviceH = [paper.height doubleValue] * self.paperToDeivceRatio;
+    
+    UIView *workSpaceView = self.workSpaceViewArray[pageIndex];
+    double workH = workSpaceView.bounds.size.height;
+    double y = (workH -  deviceH) / 2;
+    
+    CGRect cavasBounds = CGRectMake(0, y,deviceW,deviceH);
+    
+  
+    double pageWidth = cavasBounds.size.width /  paper.page.count;
+    for (int k = 0; k < paper.page.count ; k++) {
+        Page *page = paper.page[k];
+        CGRect pageRect = CGRectMake(pageWidth*k,0, pageWidth,cavasBounds.size.height);
+        UIView *pageBack = [[UIView alloc]initWithFrame:pageRect];
+        pageBack.backgroundColor = [UIColor clearColor];
+        [canvas addSubview:pageBack];
+        
+        YLImageView *bgImageView = [[YLImageView alloc]initWithFrame:CGRectMake(0, 0, pageRect.size.width, pageRect.size.height)];
+        bgImageView.imageUrl = page.data.bg.image;
+        [pageBack addSubview:bgImageView];
+        
+        Data *data = page.data;
+        for (int k = 0; k < data.photos.count ; k++) {
+            Photos *photo = data.photos[k];
+            
+            CGRect miniRectFrame = [self toMiniRect:[self getPhotoChipRawRect:photo] ratio:self.paperToDeivceRatio];
+            CGRect miniRealRectFrame = [self toMiniRect:[self getRealPhotoOffSetRawRect:photo] ratio:self.paperToDeivceRatio];
+            
+            PhotoChip *chip = [[PhotoChip alloc]initWithFrame:miniRectFrame realFrame:miniRealRectFrame];
+            chip.backgroundColor = [UIColor clearColor];
+            [pageBack addSubview:chip];
+            
+            if (photo.originalImage != nil) {
+                chip.photoImageView.image = [photo.originalImage imageByCropToRect:
+                                             [self caculateRect:photo image:photo.originalImage]];
+            }
+            
+            [chip addBorderImage:photo.image];
+            [chip roate:photo.rotate];
+            chip.button.tag = photo.photoId;
+            
+            WEAK(self)
+            chip.button.onPress = ^(YLButton *button) {
+                STRONG(self)
+                self.selectPhotoId = button.tag;
+                [self onPressSelectLoc:button];
+            };
+        }
+    }
+    
 }
 
 -(void)initPreviews {
@@ -370,16 +427,12 @@
     
     if (paper.page.count  == 1) {
         Page *page = paper.page.firstObject;
-        NSString *text = FORMAT(@"%@",page.text);
-        //[cell.button setTitle:text forState:UIControlStateNormal];
-        cell.lbPageNumber.text = text;
+        cell.lbPageNumber.text = FORMAT(@"%@",page.text);
     }
     else if (paper.page.count  == 2){
         Page *fpage = paper.page.firstObject;
         Page *lpage = paper.page.lastObject;
-        NSString *text = FORMAT(@"%@-%@",fpage.text,lpage.text);
-        //[cell.button setTitle:text forState:UIControlStateNormal];
-        cell.lbPageNumber.text = text;
+        cell.lbPageNumber.text = FORMAT(@"%@-%@",fpage.text,lpage.text);
     }
     
     // 大纲点击切换
@@ -387,8 +440,6 @@
     cell.button.onPress = ^(YLButton *button) {
         STRONG(self)
         self.selectPaperIndex = indexPath.row;
-//        [self updateUI];
-//        [self createPreviewImage:self.selectPaperIndex];
     };
     return cell;
 }
@@ -400,21 +451,9 @@
     albulmButton.backgroundColor = [UIColor clearColor];
     [albulmButton addTarget:self action:@selector(onEnterAlbum) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *albulmButtonItem = [[UIBarButtonItem alloc] initWithCustomView:albulmButton];
-    
-//    UIButton *saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    saveButton.frame = CGRectMake(0, 0, 40, 20);
-//    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
-//    saveButton.backgroundColor = [UIColor clearColor];
-//    [saveButton addTarget:self action:@selector(onSaveAlbum) forControlEvents:UIControlEventTouchUpInside];
-//    UIBarButtonItem *saveButtonItem = [[UIBarButtonItem alloc] initWithCustomView:saveButton];
-
     [self.navigationItem setRightBarButtonItems:@[albulmButtonItem]];
 }
 
-
-//-(void)onSaveAlbum {
-//    [self postUploadPreViewPhoto:self.previewImagesArray];
-//}
 
 -(void)buildUpPreViewImage {
     
@@ -509,8 +548,6 @@
             CGRect defaultCropRect =[self caculateRect:photo image:data.image];
             photo = [self decoratePhotosWithCropRect:photo cropRect:defaultCropRect angle:0];
         }
-        [self updateUI];
-        //[self createPreviewImage:self.selectPaperIndex];
         [self.summaryTableView reloadData];
     };
 }
@@ -541,14 +578,17 @@
     photo.originalImage = image;
     photo = [self decoratePhotosWithCropRect:photo cropRect:cropRect angle:angle];
     [self writePhotosWithId:self.selectPhotoId editPhoto:photo];
-    
-    [self updateUI];
-    
     WEAK(self)
     [cropViewController dismissViewControllerAnimated:YES completion:^{
         STRONG(self)
-        //[self createPreviewImage:self.selectPaperIndex];
+        [self updateUI];
     }];
+}
+
+
+-(void)updateUI {
+    [self updateCavas:self.selectPaperIndex];
+    [self updateSummeryTable];
 }
 
 
@@ -940,8 +980,4 @@
     return (NSArray*)tmp;
 }
 
-
--(void)updateUI {
-    
-}
 @end
