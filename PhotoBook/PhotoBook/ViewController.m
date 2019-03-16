@@ -452,14 +452,25 @@
 
 
 -(void)handleAutoFill {
+    NSArray *idArrays = [self getPhotosIds];
+    if (idArrays.count == 0) {
+        return;
+    }
     WEAK(self)
     self.managerPhotoVC.autoFill = ^(NSMutableArray<PhotoCellData *> * _Nonnull cellDatas) {
         STRONG(self)
-        for (PhotoCellData * data in cellDatas) {
-            
+        for (int i = 0; i < cellDatas.count ; i++) {
+            PhotoCellData *data = cellDatas[i];
+            NSInteger photoId = [idArrays[i] intValue];
+            Photos * photo = [self findPhotoWithPhotoId:photoId];
+            photo = [self decoratePhotosWithCellData:photo celldata:data];
+            CGRect defaultCropRect =[self caculateRect:photo image:data.image];
+            photo = [self decoratePhotosWithCropRect:photo cropRect:defaultCropRect angle:0];
         }
+        [self setState];
+        [self createPreviewImage:self.selectPaperIndex];
+        [self.summaryTableView reloadData];
     };
-    
 }
 
 
@@ -477,7 +488,6 @@
     photos.sourceImg.swidth = @(cropRect.size.width);
     photos.sourceImg.sheight = @(cropRect.size.height);
     photos.sourceImg.rotate = @(angle);
-    
     return photos;
 }
 
@@ -879,4 +889,20 @@
                 andButtons:@[@"取消"]];
 }
 
+//
+-(NSArray*)getPhotosIds {
+    NSMutableArray *tmp = [[NSMutableArray alloc]init];
+    for (TmplData *tmplData in self.templateData.tmplData) {
+        Paper *paper = tmplData.paper;
+        for (int i = 0; i < paper.page.count ; i++) {
+            Page *page = paper.page[i];
+            Data *data = page.data;
+            for (int k = 0; k < data.photos.count ; k++) {
+                Photos *photo = data.photos[k];
+                [tmp addObject:@(photo.photoId)];
+            }
+        }
+    }
+    return (NSArray*)tmp;
+}
 @end

@@ -7,6 +7,7 @@
 //
 
 #import "HWInstallView.h"
+#import <CoreLocation/CoreLocation.h>
 
 #define KHWInstallViewMargin 10
 #define KHWInstallColor [UIColor colorWithRed:0/255.0 green:191/255.0 blue:255/255.0 alpha:1]

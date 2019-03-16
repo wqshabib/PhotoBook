@@ -139,6 +139,7 @@ static NSString *selectorDescribe(const void *item1)
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<A2DynamicDelegate:%p; protocol = %@>", (__bridge void *)self, NSStringFromProtocol(self.protocol)];
+    
 }
 
 - (void)forwardInvocation:(NSInvocation *)outerInv
