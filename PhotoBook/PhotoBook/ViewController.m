@@ -558,6 +558,11 @@
         [self updateAllCavas];
         [self updateSummeryTable];
         [self.navigationController popViewControllerAnimated:YES];
+        WEAK(self)
+        GCD_AFTER(0.5, ^{
+            STRONG(self)
+            self.selectPaperIndex = 0;
+        })
     };
 }
 

@@ -302,7 +302,7 @@
                 }];
             };
         }
-        else if (item == 2) {
+        else if (item == 3) {
             cell.iconMenu.image = IMAGE(@"tool_hide.png");
             cell.lbMenuName.text = @"隐藏";
             WEAK(self)
@@ -316,6 +316,25 @@
                         cell.backView.transform = CGAffineTransformIdentity;
                     } completion:^(BOOL finished){
                         [self toolShowAndHide];
+                    }];
+                }];
+                
+            };
+        }
+        else if (item == 2) {
+            cell.iconMenu.image = IMAGE(@"tool_navback.png");
+            cell.lbMenuName.text = @"返回";
+            WEAK(self)
+            cell.buton.onPress = ^(YLButton *button) {
+                STRONG(self)
+                
+                [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    cell.backView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+                } completion:^(BOOL ok){
+                    [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        cell.backView.transform = CGAffineTransformIdentity;
+                    } completion:^(BOOL finished){
+                        [self.navigationController popViewControllerAnimated:YES];
                     }];
                 }];
                 
