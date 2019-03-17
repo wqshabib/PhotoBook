@@ -358,6 +358,21 @@
 
 // 删除和完成
 -(void)toolDelete {
+    
+    if (self.photos.count == 0 && self.isInEdit == NO) {
+        FCAlertView *alert = [[FCAlertView alloc] init];
+        alert.delegate = self;
+        alert.tag = 5000;
+        [alert makeAlertTypeCaution];
+        [alert showAlertInView:self
+                     withTitle:@"提示"
+                  withSubtitle:@"相册里一张相片都没有～ 去选出您喜欢的相片吧! "
+               withCustomImage:nil
+           withDoneButtonTitle:@"去选相片"
+                    andButtons:@[@"再等等"]];
+        return;
+    }
+    
     self.isInEdit = !self.isInEdit;
     [self.photoCollectionView reloadData];
     // 编辑状态

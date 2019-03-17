@@ -73,10 +73,11 @@
                                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5ln-0d-iaT" customClass="YLButton">
                                                                             <rect key="frame" x="0.0" y="0.0" width="164" height="79.666666666666671"/>
                                                                         </button>
-                                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="      " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lM6-mR-ttS">
-                                                                            <rect key="frame" x="139.66666666666666" y="61.333333333333336" width="20.333333333333343" height="14.333333333333336"/>
-                                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                                            <nil key="textColor"/>
+                                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lM6-mR-ttS">
+                                                                            <rect key="frame" x="161.33333333333334" y="70" width="2.6666666666666572" height="9.6666666666666714"/>
+                                                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                            <fontDescription key="fontDescription" type="system" pointSize="8"/>
+                                                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                             <nil key="highlightedColor"/>
                                                                         </label>
                                                                     </subviews>
@@ -94,12 +95,11 @@
                                                                         <constraint firstItem="5ln-0d-iaT" firstAttribute="top" secondItem="A5O-Da-hD0" secondAttribute="top" id="VR7-2f-dyv"/>
                                                                         <constraint firstItem="pY0-72-rAn" firstAttribute="trailing" secondItem="qcd-H4-Gf0" secondAttribute="trailing" id="YQx-yk-9gQ"/>
                                                                         <constraint firstAttribute="trailing" secondItem="qcd-H4-Gf0" secondAttribute="trailing" id="eDV-Cz-mFb"/>
-                                                                        <constraint firstAttribute="bottom" secondItem="lM6-mR-ttS" secondAttribute="bottom" constant="4" id="efX-1E-CqP"/>
+                                                                        <constraint firstAttribute="bottom" secondItem="lM6-mR-ttS" secondAttribute="bottom" id="efX-1E-CqP"/>
                                                                         <constraint firstItem="qcd-H4-Gf0" firstAttribute="top" secondItem="A5O-Da-hD0" secondAttribute="top" id="ekx-r4-H2e"/>
                                                                         <constraint firstItem="pY0-72-rAn" firstAttribute="leading" secondItem="Khy-wl-RGg" secondAttribute="leading" id="lR5-Gq-nlg"/>
                                                                         <constraint firstItem="5ln-0d-iaT" firstAttribute="leading" secondItem="A5O-Da-hD0" secondAttribute="leading" id="oFH-mK-epc"/>
-                                                                        <constraint firstItem="lM6-mR-ttS" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Khy-wl-RGg" secondAttribute="trailing" constant="8" symbolic="YES" id="oi1-aQ-bSP"/>
-                                                                        <constraint firstAttribute="trailing" secondItem="lM6-mR-ttS" secondAttribute="trailing" constant="4" id="rNG-72-LAw"/>
+                                                                        <constraint firstAttribute="trailing" secondItem="lM6-mR-ttS" secondAttribute="trailing" id="rNG-72-LAw"/>
                                                                         <constraint firstAttribute="bottom" secondItem="Khy-wl-RGg" secondAttribute="bottom" id="vlk-gC-zy2"/>
                                                                     </constraints>
                                                                 </view>
