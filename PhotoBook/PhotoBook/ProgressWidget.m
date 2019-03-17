@@ -13,28 +13,27 @@
 
 @property (nonatomic,strong) HWWaveView *waveView;
 
-@property (nonatomic,strong) UILabel *labelTile;
-
 @end
 
 @implementation ProgressWidget
 
+-(void)inital {
+    CGFloat waveWidth = 150;
+    CGFloat x = (self.bounds.size.width - 150)/2;
+    CGFloat y = (self.bounds.size.height - 150)/2;
+    CGRect bounds = CGRectMake(x, y, waveWidth, waveWidth);
+    HWWaveView *waveView = [[HWWaveView alloc] initWithFrame:bounds];
+    [self addSubview:waveView];
+    self.waveView = waveView;
+    self.hidden = YES;
+    self.waveView.progress = 0;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        self.backgroundColor = [UIColor whiteColor];
-        HWWaveView *waveView = [[HWWaveView alloc] initWithFrame:CGRectMake(30, 100, 150, 150)];
-        [self addSubview:waveView];
-        self.waveView = waveView;
-        self.hidden = YES;
-        self.waveView.progress = 0;
-        
-        self.labelTile = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 300, 100)];
-        self.labelTile.center = self.center;
-        self.labelTile.text = @"";
-        self.labelTile.textColor = [UIColor blackColor];
-        self.labelTile.font = [UIFont systemFontOfSize:22.0];
-        [self addSubview:self.labelTile];
+    self = [super initWithFrame:frame];
+    self = [[[NSBundle mainBundle] loadNibNamed:@"ProgressWidget" owner:self options:nil] lastObject];
+    if (self) {
+        self.frame = frame;
     }
     return self;
 }
@@ -52,7 +51,9 @@
 }
 
 -(void)title:(NSString*)title {
-    self.labelTile.text = title;
+//    self.labelTile.text = title;
+    self.lbLine1.text = title;
 }
+
 
 @end

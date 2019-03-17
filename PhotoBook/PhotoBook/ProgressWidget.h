@@ -12,6 +12,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ProgressWidget : UIView
 
+
+@property (weak, nonatomic) IBOutlet UILabel *lbLine1;
+@property (weak, nonatomic) IBOutlet UIView *waveBack;
+@property (weak, nonatomic) IBOutlet UILabel *lbLine2;
+
+-(void)inital;
+
 -(void)show;
 
 -(void)hide;

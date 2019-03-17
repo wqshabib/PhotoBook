@@ -82,6 +82,7 @@
     
     
     self.progressWidget = [[ProgressWidget alloc]initWithFrame:self.view.bounds];
+    [self.progressWidget inital];
     [self.view addSubview:self.progressWidget];
     
     WEAK(self)
