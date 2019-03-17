@@ -82,6 +82,10 @@
 // 当前页
 @property (nonatomic,assign) NSInteger selectPaperIndex;
 
+
+// 单页PageRect
+@property (nonatomic,assign)CGRect pageRect;
+
 @end
 
 @implementation ViewController
@@ -101,6 +105,7 @@
     [self.scrollerView setContentOffset:CGPointMake(selectPaperIndex * w, 0) animated: YES];
     [self.summaryTableView setContentOffset:CGPointMake(0, 100 * selectPaperIndex) animated:YES];
 }
+
 
 -(NSInteger)paperCount {
     return self.templateData.tmplData.count;
@@ -159,7 +164,12 @@
         [self.cavansArray addObject:canvas];
         
         
+        
         double pageWidth = cavasBounds.size.width /  paper.page.count;
+        
+        
+        self.pageRect = CGRectMake(0, 0, pageWidth, cavasBounds.size.height);
+        
         
         for (int k = 0; k < paper.page.count ; k++) {
             Page *page = paper.page[k];
@@ -198,10 +208,69 @@
                     self.selectPhotoId = button.tag;
                     [self onPressSelectLoc:button];
                 };
+                
+                // 拖动手
+                
+                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+                [chip addGestureRecognizer:panGesture];
+                
+                
+                
             }
         }
     }
 }
+
+
+
+
+
+
+
+
+//拖动手势
+-(void)panMoveGesture:(UIPanGestureRecognizer *)recognizer
+{
+    CGRect pageRect = self.pageRect;
+    CGFloat halfW = recognizer.view.frame.size.width/2;
+    CGFloat halfH = recognizer.view.frame.size.height/2;
+    
+    [recognizer.view.superview bringSubviewToFront:recognizer.view];
+    CGPoint center = recognizer.view.center;
+    CGPoint translation = [recognizer translationInView:self.view];
+    if (center.y+translation.y +halfH  > pageRect.size.height)
+    {
+        recognizer.view.center = CGPointMake(center.x, pageRect.size.height - halfH);
+
+    }
+    else if(center.y+translation.y - halfH < 0)
+    {
+        recognizer.view.center = CGPointMake(center.x,0 + halfH);
+
+    }
+    else if (center.x+translation.x + halfW > pageRect.size.width)
+    {
+        recognizer.view.center = CGPointMake(pageRect.size.width - halfW ,center.y);
+        
+    }
+    else if(center.x+translation.x - halfW < 0)
+    {
+        recognizer.view.center = CGPointMake(0 + halfW,center.y);
+        
+    }
+    else
+    {
+        recognizer.view.center = CGPointMake(center.x+translation.x, center.y+translation.y);
+        
+    }
+    [recognizer setTranslation:CGPointZero inView:recognizer.view.superview];
+    
+}
+
+
+
+
+
 
 -(void)updateAllCavas {
     for (int i = 0; i < self.cavansArray.count; i++) {
