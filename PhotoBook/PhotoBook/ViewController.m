@@ -209,22 +209,16 @@
                     [self onPressSelectLoc:button];
                 };
                 
-                // 拖动手
-                
-                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
-                [chip addGestureRecognizer:panGesture];
-                
-                
+                // 拖动处理
+                if (photo.isDrag) {
+                    UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+                    [chip addGestureRecognizer:panGesture];
+                }
                 
             }
         }
     }
 }
-
-
-
-
-
 
 
 
@@ -331,6 +325,12 @@
                 self.selectPhotoId = button.tag;
                 [self onPressSelectLoc:button];
             };
+            
+            // 拖动处理
+            if (photo.isDrag) {
+                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+                [chip addGestureRecognizer:panGesture];
+            }
         }
     }
     
