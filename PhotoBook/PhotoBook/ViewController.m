@@ -210,10 +210,10 @@
                 };
                 
                 // 拖动处理
-                if (photo.isDrag) {
-                    UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
-                    [chip addGestureRecognizer:panGesture];
-                }
+//                if (photo.isDrag == YES) {
+//                    UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+//                    [chip addGestureRecognizer:panGesture];
+//                }
                 
             }
         }
@@ -327,10 +327,10 @@
             };
             
             // 拖动处理
-            if (photo.isDrag) {
-                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
-                [chip addGestureRecognizer:panGesture];
-            }
+//            if (photo.isDrag == YES) {
+//                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+//                [chip addGestureRecognizer:panGesture];
+//            }
         }
     }
     
@@ -825,15 +825,12 @@
 }
 
 -(void)postSavewToServer {
-//    Papers *papers = [[Papers alloc]init];
-//    papers.papers = [[NSArray alloc]init];
     
     NSMutableArray *array = [[NSMutableArray alloc]init];
     for (TmplData *sigleData in self.templateData.tmplData) {
         Paper *paper = sigleData.paper;
         [array addObject:paper];
     }
-//    papers.papers = (NSArray*)array;
     
     NSDictionary *map = [self.templateData toDict];
     NSArray *mapPapers = map[@"tmplData"];
@@ -966,16 +963,28 @@
 
 
 -(void)undo {
-    
-    
+    [self developing];
 }
 
 -(void)redo {
-    
+     [self developing];
 }
 
 -(void)move {
-    
+     [self developing];
+}
+
+-(void)developing {
+    FCAlertView *alert = [[FCAlertView alloc] init];
+    alert.delegate = self;
+    alert.tag = 6000;
+    [alert makeAlertTypeCaution];
+    [alert showAlertInView:self
+                 withTitle:@"提示"
+              withSubtitle:@"功能完善中~敬请期待"
+           withCustomImage:nil
+       withDoneButtonTitle:@"好的"
+                andButtons:nil];
 }
 
 -(void)openPhoto {
