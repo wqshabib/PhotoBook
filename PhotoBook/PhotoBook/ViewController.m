@@ -210,10 +210,10 @@
                 };
                 
                 // 拖动处理
-//                if (photo.isDrag == YES) {
-//                    UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
-//                    [chip addGestureRecognizer:panGesture];
-//                }
+                if (photo.isDrag == YES) {
+                    UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+                    [chip addGestureRecognizer:panGesture];
+                }
                 
             }
         }
@@ -327,10 +327,10 @@
             };
             
             // 拖动处理
-//            if (photo.isDrag == YES) {
-//                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
-//                [chip addGestureRecognizer:panGesture];
-//            }
+            if (photo.isDrag == YES) {
+                UIPanGestureRecognizer * panGesture = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panMoveGesture:)];
+                [chip addGestureRecognizer:panGesture];
+            }
         }
     }
     
@@ -971,7 +971,7 @@
 }
 
 -(void)move {
-     [self developing];
+//     [self developing];
 }
 
 -(void)developing {

@@ -696,7 +696,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = DSY63FPDVJ;
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PhotoBook/PrefixHeader.pch";
 				INFOPLIST_FILE = PhotoBook/Info.plist;
@@ -707,7 +707,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sinopromise.photobook.PhotoBook;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = sinoWildcard;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -718,7 +718,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = DSY63FPDVJ;
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PhotoBook/PrefixHeader.pch";
 				INFOPLIST_FILE = PhotoBook/Info.plist;
@@ -729,7 +729,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sinopromise.photobook.PhotoBook;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = sinoWildcard;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
